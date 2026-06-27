@@ -68,6 +68,13 @@
   opacity: 1;
 }
 
+.nav-btn {
+  background: none;
+  border: none;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
 .shell-main {
   flex: 1;
   padding: 2.5rem 2rem;

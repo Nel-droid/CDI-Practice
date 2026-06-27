@@ -1,7 +1,17 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import './AppShell.css'
 
 export default function AppShell() {
+  const { signOut } = useAuth()
+  const navigate = useNavigate()
+
+  const handleSignOut = async (e) => {
+    e.preventDefault()
+    await signOut()
+    navigate('/', { replace: true })
+  }
+
   return (
     <div className="shell">
       <header className="shell-header">
@@ -27,9 +37,9 @@ export default function AppShell() {
           >
             Writing
           </NavLink>
-          <NavLink to="/" className="nav-link nav-signout">
+          <button onClick={handleSignOut} className="nav-link nav-signout nav-btn">
             Sign out
-          </NavLink>
+          </button>
         </nav>
       </header>
       <main className="shell-main">

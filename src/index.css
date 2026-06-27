@@ -100,6 +100,16 @@ button {
   outline-offset: 2px;
 }
 
+/* ---- Auth loading state ---- */
+.auth-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

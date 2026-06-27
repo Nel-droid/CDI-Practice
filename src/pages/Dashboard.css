@@ -118,6 +118,75 @@
   font-size: 0.95rem;
 }
 
+/* ---- Results list ---- */
+.loading-text {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.results-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.result-skill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.55rem;
+  border-radius: 4px;
+  min-width: 78px;
+  text-align: center;
+}
+
+.result-skill.reading {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.result-skill.listening {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.result-skill.writing {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.result-band {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-primary);
+  min-width: 72px;
+}
+
+.result-score {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  min-width: 48px;
+}
+
+.result-date {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin-left: auto;
+}
+
 @media (max-width: 640px) {
   .module-card {
     max-width: 100%;
