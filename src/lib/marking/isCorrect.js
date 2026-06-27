@@ -1,4 +1,5 @@
 import { normalise, countWords } from './normalise.js'
+import { expandVariants } from './spellingVariants.js'
 
 /**
  * Determine whether a candidate response is correct for a given question.
@@ -13,12 +14,17 @@ import { normalise, countWords } from './normalise.js'
  *   7. Choice types (MCQ, T/F/NG, Y/N/NG, matching): exact key match after normalisation.
  *   8. Hyphen = space: handled inside normalise().
  *
- * @param {{ answer: string|string[], type?: string, wordLimit?: number }} question
+ * Optional per-question flag:
+ *   acceptSpellingVariants: true — expands the accepted-answers list with known
+ *   GB/US spelling equivalents before comparison. Never auto-corrects arbitrary
+ *   misspellings; only swaps documented pairs from spellingVariants.js.
+ *
+ * @param {{ answer: string|string[], type?: string, wordLimit?: number, acceptSpellingVariants?: boolean }} question
  * @param {string|string[]} response
  * @returns {boolean}
  */
 export function isCorrect(question, response) {
-  const { answer, wordLimit, type } = question
+  const { answer, wordLimit, type, acceptSpellingVariants } = question
 
   // Rule 5: multiple_choice_multi — order-independent set equality
   if (type === 'multiple_choice_multi') {
@@ -35,10 +41,16 @@ export function isCorrect(question, response) {
   }
 
   const normedResponse = normalise(rawResponse)
+  const rawKeyArray = Array.isArray(answer) ? answer : [answer]
+  const normedKeyArray = rawKeyArray.map(k => normalise(String(k)))
 
-  // Rules 1, 2, 4, 7, 8: normalise both sides and check against every accepted variant
-  const keyArray = Array.isArray(answer) ? answer : [answer]
-  return keyArray.some(key => normalise(String(key)) === normedResponse)
+  // Spelling variants: when opted in per question, expand the key with known
+  // GB/US equivalents. Never active by default.
+  const finalKeyArray = acceptSpellingVariants
+    ? expandVariants(normedKeyArray)
+    : normedKeyArray
+
+  return finalKeyArray.includes(normedResponse)
 }
 
 /**
