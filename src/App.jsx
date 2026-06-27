@@ -5,9 +5,11 @@ import AppShell from './components/AppShell'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import Reading from './pages/Reading'
 import Listening from './pages/Listening'
 import Writing from './pages/Writing'
+import ReadingHome from './pages/reading/ReadingHome'
+import ReadingExam from './pages/reading/ReadingExam'
+import ReadingResults from './pages/reading/ReadingResults'
 
 export default function App() {
   return (
@@ -17,7 +19,13 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Protected area — requires login */}
+        {/* Reading exam — full-screen, own header, no AppShell */}
+        <Route
+          path="/reading/exam/:testId"
+          element={<ProtectedRoute><ReadingExam /></ProtectedRoute>}
+        />
+
+        {/* Protected area — AppShell with nav */}
         <Route element={<AppShell />}>
           <Route
             path="/dashboard"
@@ -25,7 +33,11 @@ export default function App() {
           />
           <Route
             path="/reading"
-            element={<ProtectedRoute><Reading /></ProtectedRoute>}
+            element={<ProtectedRoute><ReadingHome /></ProtectedRoute>}
+          />
+          <Route
+            path="/reading/results/:attemptId"
+            element={<ProtectedRoute><ReadingResults /></ProtectedRoute>}
           />
           <Route
             path="/listening"
