@@ -51,7 +51,7 @@ export default function Login() {
     <div className="login-page">
       <div className="login-card">
         <Link to="/" className="login-back">&larr; Back to home</Link>
-        <h1 className="login-title">CDI IELTS Practice</h1>
+        <h1 className="login-title">CDI Practice</h1>
 
         <div className="login-tabs" role="tablist">
           <Link

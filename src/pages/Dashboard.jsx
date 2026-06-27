@@ -26,7 +26,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <h1 className="page-title">Dashboard</h1>
+      <h1 className="page-title">My Dashboard</h1>
       <p className="page-subtitle">
         Choose a module to practise, or pick up where you left off.
       </p>

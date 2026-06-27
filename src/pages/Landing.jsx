@@ -5,13 +5,13 @@ export default function Landing() {
   return (
     <div className="landing">
       <header className="landing-header">
-        <span className="landing-logo">CDI IELTS Practice</span>
+        <span className="landing-logo">CDI Practice</span>
         <Link to="/login" className="landing-login-link">Log in</Link>
       </header>
 
       <main className="landing-main">
         <section className="landing-hero">
-          <h1 className="landing-title">IELTS Mock Tests — Online</h1>
+          <h1 className="landing-title">Academic English Practice Tests</h1>
           <p className="landing-subtitle">
             Practise Reading, Listening, and Writing under real exam conditions.
             Get instant scores and detailed explanations — completely free.

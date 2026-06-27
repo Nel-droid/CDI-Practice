@@ -16,7 +16,7 @@ export default function AppShell() {
     <div className="shell">
       <header className="shell-header">
         <NavLink to="/dashboard" className="shell-logo">
-          CDI IELTS Practice
+          CDI Practice
         </NavLink>
         <nav className="shell-nav" aria-label="Main navigation">
           <NavLink
