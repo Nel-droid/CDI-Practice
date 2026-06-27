@@ -1,0 +1,47 @@
+.placeholder-page {
+  max-width: 640px;
+  padding: 1rem 0;
+}
+
+.placeholder-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.placeholder-tag.reading {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.placeholder-tag.listening {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.placeholder-tag.writing {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.placeholder-page h1 {
+  font-size: 2rem;
+  color: var(--color-primary);
+  margin-bottom: 1.25rem;
+}
+
+.placeholder-body {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0.75rem;
+}
+
+.placeholder-body strong {
+  color: var(--color-text);
+}

@@ -1,0 +1,125 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.page-title {
+  font-size: 1.9rem;
+  color: var(--color-primary);
+  margin-bottom: 0.3rem;
+}
+
+.page-subtitle {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+/* ---- Module cards ---- */
+.module-cards {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.module-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.75rem 2rem;
+  flex: 1 1 220px;
+  max-width: 320px;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.15s, transform 0.12s;
+  border-top: 4px solid transparent;
+}
+
+.module-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.13);
+  transform: translateY(-3px);
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.module-reading {
+  border-top-color: #3b82f6;
+}
+
+.module-listening {
+  border-top-color: #10b981;
+}
+
+.module-writing {
+  border-top-color: #f59e0b;
+}
+
+.module-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.module-card h2 {
+  font-size: 1.35rem;
+  color: var(--color-primary);
+}
+
+.module-card p {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.module-cta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-top: 0.5rem;
+}
+
+/* ---- Recent results ---- */
+.section-title {
+  font-size: 1.2rem;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.empty-state {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.empty-heading {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.4rem;
+}
+
+.empty-body {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .module-card {
+    max-width: 100%;
+  }
+}
