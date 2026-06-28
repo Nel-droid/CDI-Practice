@@ -1,45 +1,9 @@
-import { useEffect, useState } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
+import { useEffect, useState, useCallback } from 'react'
+import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import './ReadingResults.css'
 
-// Highlight a quote string inside paragraph text
-function highlightText(text, quote) {
-  if (!quote) return <>{text}</>
-  const idx = text.toLowerCase().indexOf(quote.toLowerCase())
-  if (idx === -1) return <>{text}</>
-  return (
-    <>
-      {text.slice(0, idx)}
-      <mark className="evidence-mark">{text.slice(idx, idx + quote.length)}</mark>
-      {text.slice(idx + quote.length)}
-    </>
-  )
-}
-
-function PassagePanelFeedback({ sections, evidence }) {
-  const sec = sections.find(s => s.id === evidence?.sectionId)
-  if (!sec) return null
-  return (
-    <div className="results-passage">
-      <h3 className="results-passage-title">{sec.title}</h3>
-      {sec.passage?.map(para => (
-        <div
-          key={para.ref}
-          className={`results-para ${evidence?.ref === para.ref ? 'evidence-para' : ''}`}
-          id={`fb-para-${sec.id}-${para.ref}`}
-        >
-          <span className="para-ref">{para.ref}</span>
-          <span className="para-text">
-            {evidence?.ref === para.ref
-              ? highlightText(para.text, evidence.quote)
-              : para.text}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmtDuration(secs) {
   if (!secs) return '—'
@@ -54,16 +18,267 @@ function bandClass(band) {
   return 'band-low'
 }
 
+function formatGiven(given) {
+  if (Array.isArray(given)) return given.join(', ') || '(no answer)'
+  return given || '(no answer)'
+}
+
+function formatAnswer(answer, groupType) {
+  if (!Array.isArray(answer)) return answer ?? '—'
+  return answer.join(groupType === 'choose_two' ? ' and ' : ' / ')
+}
+
+// ── Popover positioning ───────────────────────────────────────────────────────
+
+function getPopoverStyle(anchorRect) {
+  if (!anchorRect) return {}
+  const W = window.innerWidth
+  const H = window.innerHeight
+  const POP_W = 360
+  const GAP = 8
+  let left = anchorRect.left
+  if (left + POP_W > W - GAP) left = W - POP_W - GAP
+  if (left < GAP) left = GAP
+  if (H - anchorRect.bottom - GAP >= 180) {
+    return { top: anchorRect.bottom + GAP, left, width: POP_W }
+  }
+  return { bottom: H - anchorRect.top + GAP, left, width: POP_W }
+}
+
+// ── Explanation Popover ───────────────────────────────────────────────────────
+
+function ExplanationPopover({ item, anchorRect, onClose }) {
+  const { pq, meta } = item
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (e.target.closest('.review-popover')) return
+      if (e.target.closest('.ev-qnum-box')) return
+      if (e.target.closest('.rl-info-btn')) return
+      onClose()
+    }
+    function handleKey(e) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('mousedown', handleOutside)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleOutside)
+      document.removeEventListener('keydown', handleKey)
+    }
+  }, [onClose])
+
+  const answerDisplay = formatAnswer(pq.answer, meta?.group?.type)
+  const givenDisplay  = formatGiven(pq.given)
+
+  return (
+    <div
+      className="review-popover"
+      style={getPopoverStyle(anchorRect)}
+      role="dialog"
+      aria-modal="false"
+      aria-label={`Explanation for question ${pq.number}`}
+    >
+      <div className="popover-header">
+        <span className="popover-qnum">Q{pq.number}</span>
+        {pq.correct
+          ? <span className="badge-correct">✓ Correct</span>
+          : <span className="badge-wrong">✗ Incorrect</span>}
+        <button className="popover-close" onClick={onClose} aria-label="Close explanation">×</button>
+      </div>
+
+      {meta?.prompt && (
+        <div className="popover-section">
+          <span className="popover-label">Question</span>
+          <p className="popover-text">{meta.prompt}</p>
+        </div>
+      )}
+
+      <div className="popover-section">
+        <span className="popover-label">Your answer</span>
+        <span className={`popover-answer ${pq.correct ? 'answer-correct' : 'answer-wrong'}`}>
+          {givenDisplay}
+        </span>
+      </div>
+
+      {!pq.correct && (
+        <div className="popover-section">
+          <span className="popover-label">Correct answer</span>
+          <span className="popover-answer answer-correct">{answerDisplay}</span>
+        </div>
+      )}
+
+      {meta?.explanation && (
+        <div className="popover-section">
+          <span className="popover-label">Explanation</span>
+          <p className="popover-text">{meta.explanation}</p>
+        </div>
+      )}
+
+      {meta?.evidence?.quote && (
+        <div className="popover-section">
+          <span className="popover-label">Evidence</span>
+          <blockquote className="popover-quote">"{meta.evidence.quote}"</blockquote>
+        </div>
+      )}
+
+      {meta?.paraphraseNote && (
+        <div className="popover-section popover-paraphrase">
+          <span className="popover-label">Paraphrase / wording</span>
+          <p className="popover-text">{meta.paraphraseNote}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Multi-highlight renderer ──────────────────────────────────────────────────
+// Finds each evidence quote in a paragraph, wraps it in a <mark>, and appends
+// a small clickable [N] number box immediately after the highlighted text.
+// Multiple quotes per paragraph are rendered in document order; overlapping
+// spans are dropped (first wins).
+
+function renderWithHighlights(text, items, openPopover) {
+  const spans = []
+  for (const item of items) {
+    const quote = item.meta?.evidence?.quote
+    if (!quote) continue
+    const idx = text.toLowerCase().indexOf(quote.toLowerCase())
+    if (idx === -1) continue
+    spans.push({ start: idx, end: idx + quote.length, item })
+  }
+  spans.sort((a, b) => a.start - b.start)
+
+  const clean = []
+  let lastEnd = 0
+  for (const sp of spans) {
+    if (sp.start >= lastEnd) { clean.push(sp); lastEnd = sp.end }
+  }
+
+  const parts = []
+  let cursor = 0
+  for (let i = 0; i < clean.length; i++) {
+    const { start, end, item } = clean[i]
+    const { pq } = item
+    if (start > cursor) parts.push(text.slice(cursor, start))
+    parts.push(
+      <mark
+        key={i}
+        className={`ev-highlight ${pq.correct ? 'ev-correct' : 'ev-wrong'}`}
+      >
+        {text.slice(start, end)}
+        <button
+          className="ev-qnum-box"
+          onClick={e => { e.stopPropagation(); openPopover(item, e) }}
+          onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); openPopover(item, e) } }}
+          aria-label={`Question ${pq.number}: ${pq.correct ? 'correct' : 'incorrect'} — open explanation`}
+        >{pq.number}</button>
+      </mark>
+    )
+    cursor = end
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor))
+  return parts
+}
+
+// ── Review: passage column ────────────────────────────────────────────────────
+
+function PassagePanelReview({ sections, activeSection, onSectionChange, evidenceByPara, openPopover }) {
+  const sec = sections[activeSection]
+  return (
+    <div className="review-passage-col">
+      <nav className="review-tabs" aria-label="Passages">
+        {sections.map((s, i) => (
+          <button
+            key={s.id}
+            className={`review-tab ${activeSection === i ? 'active' : ''}`}
+            onClick={() => onSectionChange(i)}
+            aria-current={activeSection === i ? 'page' : undefined}
+          >
+            {s.title}
+          </button>
+        ))}
+      </nav>
+      {sec && (
+        <div className="review-passage-inner">
+          <h2 className="review-passage-title">{sec.title}</h2>
+          {sec.passage?.map(para => {
+            const key = `${sec.id}:${para.ref}`
+            const items = evidenceByPara[key] ?? []
+            return (
+              <div
+                key={para.ref}
+                className={`review-para ${items.length > 0 ? 'has-evidence' : ''}`}
+              >
+                <span className="para-ref" aria-label={`Paragraph ${para.ref}`}>{para.ref}</span>
+                <span className="para-text">
+                  {items.length > 0
+                    ? renderWithHighlights(para.text, items, openPopover)
+                    : para.text}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Review: question list column ──────────────────────────────────────────────
+
+function ReviewListPanel({ perQuestion, qMeta, sections, activePopoverNum, openPopover }) {
+  return (
+    <div className="review-list-col">
+      <div className="rl-header">Questions</div>
+      {sections.map(sec => {
+        const secQs = perQuestion.filter(pq => qMeta[pq.number]?.sectionId === sec.id)
+        if (secQs.length === 0) return null
+        return (
+          <div key={sec.id} className="rl-section-group">
+            <div className="rl-section-title">{sec.title}</div>
+            {secQs.map(pq => {
+              const meta = qMeta[pq.number]
+              const answerDisplay = formatAnswer(pq.answer, meta?.group?.type)
+              const isActive = activePopoverNum === pq.number
+              return (
+                <div key={pq.number} className={`rl-row ${isActive ? 'rl-row-active' : ''}`}>
+                  <span className="rl-qchip">Q{pq.number}</span>
+                  <span className={`rl-mark ${pq.correct ? 'rl-correct' : 'rl-wrong'}`}>
+                    {pq.correct ? '✓' : '✗'}
+                  </span>
+                  <span className="rl-answer">Answer: {answerDisplay}</span>
+                  <button
+                    className="rl-info-btn"
+                    onClick={e => openPopover({ pq, meta }, e)}
+                    aria-label={`Open explanation for question ${pq.number}`}
+                  >ⓘ</button>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
 export default function ReadingResults() {
   const { attemptId } = useParams()
-  const navigate = useNavigate()
 
-  const [attempt, setAttempt] = useState(null)
-  const [test, setTest] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [mode, setMode] = useState('results')   // 'results' | 'feedback'
-  const [feedbackQ, setFeedbackQ] = useState(null)  // the question under review
+  const [attempt,        setAttempt]       = useState(null)
+  const [test,           setTest]          = useState(null)
+  const [loading,        setLoading]       = useState(true)
+  const [error,          setError]         = useState('')
+  const [mode,           setMode]          = useState('results')  // 'results' | 'review'
+  const [reviewSection,  setReviewSection] = useState(0)
+  const [popover,        setPopover]       = useState(null)  // { item, anchorRect } | null
+
+  const closePopover = useCallback(() => setPopover(null), [])
+
+  function openPopover(item, e) {
+    setPopover({ item, anchorRect: e.currentTarget.getBoundingClientRect() })
+  }
 
   useEffect(() => {
     async function load() {
@@ -93,11 +308,11 @@ export default function ReadingResults() {
   if (loading) return <div className="results-loading" aria-live="polite">Loading results…</div>
   if (error)   return <div className="results-error"><p>{error}</p><Link to="/reading">← Back to Reading</Link></div>
 
-  const marked = attempt.marked ?? {}
+  const marked      = attempt.marked ?? {}
   const perQuestion = marked.perQuestion ?? []
-  const sections = test?.sections ?? []
+  const sections    = test?.sections ?? []
 
-  // Build lookup: questionNumber → { question meta, group }
+  // Lookup: questionNumber → { question meta, group ref, sectionId }
   const qMeta = {}
   for (const sec of sections) {
     for (const grp of sec.groups ?? []) {
@@ -107,13 +322,7 @@ export default function ReadingResults() {
     }
   }
 
-  function openFeedback(pq) {
-    const meta = qMeta[pq.number]
-    setFeedbackQ({ ...pq, meta })
-    setMode('feedback')
-  }
-
-  // ── Results view ────────────────────────────────────────────
+  // ── Results view ────────────────────────────────────────────────────────────
 
   if (mode === 'results') {
     return (
@@ -148,7 +357,10 @@ export default function ReadingResults() {
 
           <div className="results-actions">
             <Link to="/dashboard" className="btn btn-outline">Dashboard</Link>
-            <button className="btn btn-primary" onClick={() => setMode('feedback')}>
+            <button
+              className="btn btn-primary"
+              onClick={() => { setMode('review'); setPopover(null); setReviewSection(0) }}
+            >
               Review with feedback →
             </button>
           </div>
@@ -163,18 +375,13 @@ export default function ReadingResults() {
                 <th>Your answer</th>
                 <th>Correct answer</th>
                 <th>Result</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
               {perQuestion.map(pq => {
-                const given = Array.isArray(pq.given)
-                  ? pq.given.join(', ') || '—'
-                  : (pq.given ?? '—')
+                const given      = formatGiven(pq.given)
                 const answerJoin = qMeta[pq.number]?.group?.type === 'choose_two' ? ' and ' : ' / '
-                const answer = Array.isArray(pq.answer)
-                  ? pq.answer.join(answerJoin)
-                  : (pq.answer ?? '—')
+                const answer     = Array.isArray(pq.answer) ? pq.answer.join(answerJoin) : (pq.answer ?? '—')
                 return (
                   <tr key={pq.number} className={pq.correct ? 'row-correct' : 'row-wrong'}>
                     <td className="td-num">{pq.number}</td>
@@ -184,15 +391,6 @@ export default function ReadingResults() {
                       {pq.correct
                         ? <span className="badge-correct">✓ Correct</span>
                         : <span className="badge-wrong">✗ Wrong</span>}
-                    </td>
-                    <td>
-                      <button
-                        className="btn-explain"
-                        onClick={() => openFeedback(pq)}
-                        aria-label={`Explanation for question ${pq.number}`}
-                      >
-                        Explain →
-                      </button>
                     </td>
                   </tr>
                 )
@@ -204,160 +402,60 @@ export default function ReadingResults() {
     )
   }
 
-  // ── Feedback view ───────────────────────────────────────────
+  // ── Review view ─────────────────────────────────────────────────────────────
 
-  const currentIdx = feedbackQ
-    ? perQuestion.findIndex(p => p.number === feedbackQ.number)
-    : 0
-
-  function goTo(idx) {
-    if (idx < 0 || idx >= perQuestion.length) return
-    const pq = perQuestion[idx]
+  // Map: `${sectionId}:${paraRef}` → [{ pq, meta }]
+  const evidenceByPara = {}
+  for (const pq of perQuestion) {
     const meta = qMeta[pq.number]
-    setFeedbackQ({ ...pq, meta })
+    const ev   = meta?.evidence
+    if (ev?.sectionId && ev?.ref && ev?.quote) {
+      const key = `${ev.sectionId}:${ev.ref}`
+      if (!evidenceByPara[key]) evidenceByPara[key] = []
+      evidenceByPara[key].push({ pq, meta })
+    }
   }
 
-  const meta = feedbackQ?.meta
-  const evidence = meta?.evidence ?? null
-  const givenDisplay = Array.isArray(feedbackQ?.given)
-    ? feedbackQ.given.join(', ') || '(no answer)'
-    : (feedbackQ?.given ?? '(no answer)')
-  const feedbackAnswerJoin = meta?.group?.type === 'choose_two' ? ' and ' : ' / '
-  const answerDisplay = Array.isArray(feedbackQ?.answer)
-    ? feedbackQ.answer.join(feedbackAnswerJoin)
-    : (feedbackQ?.answer ?? '—')
+  const activePopoverNum = popover?.item?.pq?.number ?? null
 
   return (
-    <div className="feedback-page">
-      {/* Toolbar */}
-      <div className="feedback-toolbar">
-        <button className="btn btn-outline btn-sm" onClick={() => setMode('results')}>
+    <div className="review-page">
+      <div className="review-toolbar">
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => { setMode('results'); setPopover(null) }}
+        >
           ← Back to results
         </button>
-        <span className="feedback-nav-label">
-          Question {feedbackQ?.number ?? '—'} of {perQuestion.length}
+        <span className="review-toolbar-title">In-passage review</span>
+        <span className="review-toolbar-score">
+          {marked.raw ?? 0} / {marked.total ?? perQuestion.length} correct
         </span>
-        <div className="feedback-nav-btns">
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={() => goTo(currentIdx - 1)}
-            disabled={currentIdx <= 0}
-            aria-label="Previous question"
-          >
-            ‹ Prev
-          </button>
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={() => goTo(currentIdx + 1)}
-            disabled={currentIdx >= perQuestion.length - 1}
-            aria-label="Next question"
-          >
-            Next ›
-          </button>
-        </div>
       </div>
 
-      {/* Question picker (palette) */}
-      <div className="feedback-palette-wrap">
-        <nav className="feedback-palette" aria-label="Jump to question">
-          {perQuestion.map((pq, i) => (
-            <button
-              key={pq.number}
-              className={`fb-palette-btn ${pq.correct ? 'correct' : 'wrong'} ${i === currentIdx ? 'current' : ''}`}
-              onClick={() => goTo(i)}
-              aria-label={`Question ${pq.number}: ${pq.correct ? 'correct' : 'wrong'}`}
-              aria-current={i === currentIdx ? 'true' : undefined}
-            >
-              {pq.number}
-            </button>
-          ))}
-        </nav>
+      <div className="review-body">
+        <PassagePanelReview
+          sections={sections}
+          activeSection={reviewSection}
+          onSectionChange={i => { setReviewSection(i); setPopover(null) }}
+          evidenceByPara={evidenceByPara}
+          openPopover={openPopover}
+        />
+        <ReviewListPanel
+          perQuestion={perQuestion}
+          qMeta={qMeta}
+          sections={sections}
+          activePopoverNum={activePopoverNum}
+          openPopover={openPopover}
+        />
       </div>
 
-      {feedbackQ ? (
-        <div className="feedback-body">
-          {/* Left: passage with evidence highlighted */}
-          <div className="feedback-passage-col">
-            <PassagePanelFeedback sections={sections} evidence={evidence} />
-          </div>
-
-          {/* Right: explanation panel */}
-          <div className="feedback-detail-col">
-            <div className={`feedback-card ${feedbackQ.correct ? 'fb-correct' : 'fb-wrong'}`}>
-              <div className="fb-card-header">
-                <span className="fb-q-number">Q{feedbackQ.number}</span>
-                {feedbackQ.correct
-                  ? <span className="badge-correct">✓ Correct</span>
-                  : <span className="badge-wrong">✗ Incorrect</span>}
-              </div>
-
-              {meta?.prompt && (
-                <p className="fb-prompt">{meta.prompt}</p>
-              )}
-
-              <div className="fb-answers">
-                <div className="fb-answer-row">
-                  <span className="fb-answer-label">Your answer</span>
-                  <span className={`fb-answer-value ${feedbackQ.correct ? 'correct' : 'wrong'}`}>
-                    {String(givenDisplay)}
-                  </span>
-                </div>
-                {!feedbackQ.correct && (
-                  <div className="fb-answer-row">
-                    <span className="fb-answer-label">Correct answer</span>
-                    <span className="fb-answer-value correct">{String(answerDisplay)}</span>
-                  </div>
-                )}
-              </div>
-
-              {meta?.explanation && (
-                <div className="fb-explanation">
-                  <p className="fb-explanation-label">Explanation</p>
-                  <p className="fb-explanation-text">{meta.explanation}</p>
-                </div>
-              )}
-
-              {evidence && (
-                <div className="fb-evidence">
-                  <p className="fb-evidence-label">
-                    Evidence — {evidence.sectionId === 'p1' ? 'Passage 1' : evidence.sectionId === 'p2' ? 'Passage 2' : 'Passage 3'}, Paragraph {evidence.ref}
-                  </p>
-                  <blockquote className="fb-evidence-quote">
-                    "{evidence.quote}"
-                  </blockquote>
-                </div>
-              )}
-            </div>
-
-            <div className="fb-nav-bottom">
-              <button
-                className="btn btn-outline"
-                onClick={() => goTo(currentIdx - 1)}
-                disabled={currentIdx <= 0}
-              >
-                ‹ Previous question
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => goTo(currentIdx + 1)}
-                disabled={currentIdx >= perQuestion.length - 1}
-              >
-                Next question ›
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="feedback-pick-prompt">
-          <p>Select a question from the palette above to view its explanation and evidence.</p>
-          <div className="fb-start-btns">
-            {perQuestion.length > 0 && (
-              <button className="btn btn-primary" onClick={() => goTo(0)}>
-                Start from Question 1 →
-              </button>
-            )}
-          </div>
-        </div>
+      {popover && (
+        <ExplanationPopover
+          item={popover.item}
+          anchorRect={popover.anchorRect}
+          onClose={closePopover}
+        />
       )}
     </div>
   )
