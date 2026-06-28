@@ -317,10 +317,13 @@
   padding: 0 0.1em;
 }
 
+/* Tint classes for the highlight region */
 .ev-correct { background: #bbf7d0; }
 .ev-wrong   { background: #fecaca; }
+.ev-mixed   { background: #fef9c3; }  /* amber — span contains mixed correct/wrong questions */
 
-/* [N] number box at the end of each highlighted span */
+/* [N] number boxes — coloured independently of the parent mark tint so that
+   a mixed-tint span can show both green and red boxes side by side. */
 .ev-qnum-box {
   display: inline-flex;
   align-items: center;
@@ -347,11 +350,13 @@
 .ev-qnum-box:hover         { background: #374151; }
 .ev-qnum-box:focus-visible { outline: 2px solid #6b7280; outline-offset: 2px; }
 
-.ev-correct .ev-qnum-box       { background: #059669; }
-.ev-correct .ev-qnum-box:hover { background: #047857; }
+/* Correct question box → green */
+.ev-qnum-box.ev-qnum-correct       { background: #059669; }
+.ev-qnum-box.ev-qnum-correct:hover { background: #047857; }
 
-.ev-wrong .ev-qnum-box         { background: #dc2626; }
-.ev-wrong .ev-qnum-box:hover   { background: #b91c1c; }
+/* Wrong question box → red */
+.ev-qnum-box.ev-qnum-wrong         { background: #dc2626; }
+.ev-qnum-box.ev-qnum-wrong:hover   { background: #b91c1c; }
 
 /* ── Review: question list column ────────────────────────────── */
 
@@ -474,6 +479,9 @@
   padding: 0.7rem 1rem 0.6rem;
   background: #f0f4ff;
   border-bottom: 1px solid #d0daf0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .popover-qnum {

@@ -4,6 +4,13 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import './ReadingHome.css'
 
+function countQuestions(content) {
+  return (content?.sections ?? [])
+    .flatMap(s => s.groups ?? [])
+    .flatMap(g => g.questions ?? [])
+    .length
+}
+
 export default function ReadingHome() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -17,7 +24,7 @@ export default function ReadingHome() {
   useEffect(() => {
     supabase
       .from('tests')
-      .select('id, skill, book, test_label, variant, duration_seconds')
+      .select('id, skill, book, test_label, variant, duration_seconds, content')
       .eq('skill', 'reading')
       .eq('published', true)
       .order('book')
@@ -76,7 +83,7 @@ export default function ReadingHome() {
         <h1 className="rh-title">Reading Practice</h1>
         <p className="rh-subtitle">
           Choose a test book, then select Test 1–4 to begin. You will have
-          60 minutes to answer 36 questions across three passages.
+          60 minutes to complete a full Academic Reading test across three passages.
         </p>
       </header>
 
@@ -116,7 +123,7 @@ export default function ReadingHome() {
                       <div className="rh-test-info">
                         <span className="rh-test-label">{test.test_label}</span>
                         <span className="rh-test-meta">
-                          Academic Reading · 36 questions · 60 min
+                          Academic Reading · {countQuestions(test.content)} questions · 60 min
                         </span>
                       </div>
                       <button

@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { scoreModule } from '../../lib/marking/index'
+import { warnIfMisaligned } from '../../lib/marking/validateTest'
 import './ReadingExam.css'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -344,7 +345,7 @@ export default function ReadingExam() {
   useEffect(() => {
     supabase
       .from('tests')
-      .select('content, duration_seconds')
+      .select('content, duration_seconds, published, test_label')
       .eq('id', testId)
       .single()
       .then(({ data, error }) => {
@@ -352,6 +353,7 @@ export default function ReadingExam() {
         setTest(data.content)
         setTimeLeft(data.duration_seconds)
         startedAtRef.current = Date.now()
+        warnIfMisaligned(data)
       })
   }, [testId])
 

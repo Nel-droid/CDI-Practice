@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { mergeHighlightSpans } from '../../lib/highlighting/mergeHighlightSpans'
 import './ReadingResults.css'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -30,19 +31,29 @@ function formatAnswer(answer, groupType) {
 
 // ── Popover positioning ───────────────────────────────────────────────────────
 
+const POP_W = 360
+const POP_GAP = 8
+
 function getPopoverStyle(anchorRect) {
   if (!anchorRect) return {}
   const W = window.innerWidth
   const H = window.innerHeight
-  const POP_W = 360
-  const GAP = 8
+
+  // Horizontal: left-align to trigger, shift left if near the right edge
   let left = anchorRect.left
-  if (left + POP_W > W - GAP) left = W - POP_W - GAP
-  if (left < GAP) left = GAP
-  if (H - anchorRect.bottom - GAP >= 180) {
-    return { top: anchorRect.bottom + GAP, left, width: POP_W }
+  if (left + POP_W > W - POP_GAP) left = W - POP_W - POP_GAP
+  if (left < POP_GAP) left = POP_GAP
+
+  const spaceBelow = H - anchorRect.bottom - POP_GAP
+  const spaceAbove = anchorRect.top - POP_GAP
+
+  // Prefer downward; flip upward only when there is more room above.
+  // Pass maxHeight so the popover is capped to the available space in whichever
+  // direction we open — the CSS overflow-y:auto then handles internal scrolling.
+  if (spaceBelow >= spaceAbove) {
+    return { top: anchorRect.bottom + POP_GAP, left, width: POP_W, maxHeight: spaceBelow }
   }
-  return { bottom: H - anchorRect.top + GAP, left, width: POP_W }
+  return { bottom: H - anchorRect.top + POP_GAP, left, width: POP_W, maxHeight: spaceAbove }
 }
 
 // ── Explanation Popover ───────────────────────────────────────────────────────
@@ -131,50 +142,43 @@ function ExplanationPopover({ item, anchorRect, onClose }) {
 }
 
 // ── Multi-highlight renderer ──────────────────────────────────────────────────
-// Finds each evidence quote in a paragraph, wraps it in a <mark>, and appends
-// a small clickable [N] number box immediately after the highlighted text.
-// Multiple quotes per paragraph are rendered in document order; overlapping
-// spans are dropped (first wins).
+// Merges overlapping/duplicate evidence spans into clusters so two questions
+// that reference the same passage sentence both render their [N] boxes, e.g.
+// a shared sentence shows [5][10] rather than dropping one of them.
 
 function renderWithHighlights(text, items, openPopover) {
-  const spans = []
-  for (const item of items) {
-    const quote = item.meta?.evidence?.quote
-    if (!quote) continue
-    const idx = text.toLowerCase().indexOf(quote.toLowerCase())
-    if (idx === -1) continue
-    spans.push({ start: idx, end: idx + quote.length, item })
-  }
-  spans.sort((a, b) => a.start - b.start)
-
-  const clean = []
-  let lastEnd = 0
-  for (const sp of spans) {
-    if (sp.start >= lastEnd) { clean.push(sp); lastEnd = sp.end }
-  }
+  const clusters = mergeHighlightSpans(text, items)
+  if (clusters.length === 0) return [text]
 
   const parts = []
   let cursor = 0
-  for (let i = 0; i < clean.length; i++) {
-    const { start, end, item } = clean[i]
-    const { pq } = item
-    if (start > cursor) parts.push(text.slice(cursor, start))
+
+  clusters.forEach((cluster, i) => {
+    if (cluster.start > cursor) parts.push(text.slice(cursor, cluster.start))
+
+    const allCorrect = cluster.items.every(it => it.pq.correct)
+    const allWrong   = cluster.items.every(it => !it.pq.correct)
+    const tintClass  = allCorrect ? 'ev-correct' : allWrong ? 'ev-wrong' : 'ev-mixed'
+
     parts.push(
-      <mark
-        key={i}
-        className={`ev-highlight ${pq.correct ? 'ev-correct' : 'ev-wrong'}`}
-      >
-        {text.slice(start, end)}
-        <button
-          className="ev-qnum-box"
-          onClick={e => { e.stopPropagation(); openPopover(item, e) }}
-          onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); openPopover(item, e) } }}
-          aria-label={`Question ${pq.number}: ${pq.correct ? 'correct' : 'incorrect'} — open explanation`}
-        >{pq.number}</button>
+      <mark key={i} className={`ev-highlight ${tintClass}`}>
+        {text.slice(cluster.start, cluster.end)}
+        {cluster.items.map(item => (
+          <button
+            key={item.pq.number}
+            className={`ev-qnum-box ${item.pq.correct ? 'ev-qnum-correct' : 'ev-qnum-wrong'}`}
+            onClick={e => { e.stopPropagation(); openPopover(item, e) }}
+            onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); openPopover(item, e) } }}
+            aria-label={`Question ${item.pq.number}: ${item.pq.correct ? 'correct' : 'incorrect'} — open explanation`}
+          >
+            {item.pq.number}
+          </button>
+        ))}
       </mark>
     )
-    cursor = end
-  }
+    cursor = cluster.end
+  })
+
   if (cursor < text.length) parts.push(text.slice(cursor))
   return parts
 }

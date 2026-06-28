@@ -34,7 +34,7 @@ END $$;
 
 -- ============================================================
 -- 2. Insert the placeholder Reading test (CDI Practice — Test 1)
---    36 questions across 3 passages covering all 7 question types.
+--    40 questions across 3 passages covering all 7 question types.
 --    All content is original placeholder material — NOT Cambridge.
 -- ============================================================
 INSERT INTO public.tests (skill, book, test_label, variant, duration_seconds, content, published)
@@ -113,7 +113,7 @@ VALUES (
           "questions":[
             {"number":14,"prompt":"Paragraph A","answer":"i","explanation":"Paragraph A describes weighted ropes and early echo sounding — the slow and imprecise earliest methods of measuring ocean depth.","evidence":{"sectionId":"p2","ref":"A","quote":"Early attempts to measure its depth relied on weighted ropes, a method that was slow and imprecise"}},
             {"number":15,"prompt":"Paragraph B","answer":"ii","explanation":"Paragraph B explains how satellite radar altimetry detects sea surface height variations to infer seabed shape — surface observations revealing underwater geography.","evidence":{"sectionId":"p2","ref":"B","quote":"detect subtle variations in sea surface height caused by the gravitational pull of underwater mountains and ridges"}},
-            {"number":16,"prompt":"Paragraph C","answer":"iii","explanation":"Paragraph C focuses on AUVs — autonomous robotic vehicles that map the seabed without human pilots.","evidence":{"sectionId":"p2","ref":"C","quote":"Autonomous underwater vehicles, or AUVs... operate without human pilots"}},
+            {"number":16,"prompt":"Paragraph C","answer":"iii","explanation":"Paragraph C focuses on AUVs — autonomous robotic vehicles that map the seabed without human pilots.","evidence":{"sectionId":"p2","ref":"C","quote":"These robotic craft operate without human pilots"}},
             {"number":17,"prompt":"Paragraph D","answer":"iv","explanation":"Paragraph D describes the challenge of processing terabytes of sonar data and using machine learning to manage it.","evidence":{"sectionId":"p2","ref":"D","quote":"A single AUV mission can generate terabytes of sonar recordings that must be cleaned"}},
             {"number":18,"prompt":"Paragraph E","answer":"v","explanation":"Paragraph E describes the Seabed 2030 initiative, an international collaboration to complete ocean floor mapping.","evidence":{"sectionId":"p2","ref":"E","quote":"International initiatives such as Seabed 2030 bring together research institutions from dozens of countries"}}
           ]
@@ -172,8 +172,8 @@ VALUES (
           "instructions":"Choose TWO letters, A–E.",
           "options":[{"key":"A","text":"Mirrors"},{"key":"B","text":"Phone screens"},{"key":"C","text":"Optical fibres"},{"key":"D","text":"Magnifying lenses"},{"key":"E","text":"Camera lenses"}],
           "questions":[
-            {"number":35,"prompt":"Which TWO of the following modern glass products are mentioned in Paragraph F?","answer":["B","C"],"explanation":"Paragraph F mentions phone screens (tempered glass) and optical fibres as modern glass products.","evidence":{"sectionId":"p3","ref":"F","quote":"phone screens... Optical fibres, strands of exceptionally pure glass"},"paraphraseNote":"Phone screens and optical fibres are named directly in Paragraph F — no paraphrase bridge needed here. The distractors (mirrors, magnifying lenses, camera lenses) are all real glass products, but none of them appear in this paragraph."},
-            {"number":36,"prompt":"Which TWO of the following modern glass products are mentioned in Paragraph F?","answer":["B","C"],"explanation":"Paragraph F mentions phone screens (tempered glass) and optical fibres as modern glass products.","evidence":{"sectionId":"p3","ref":"F","quote":"phone screens... Optical fibres, strands of exceptionally pure glass"}}
+            {"number":35,"prompt":"Which TWO of the following modern glass products are mentioned in Paragraph F?","answer":["B","C"],"explanation":"Paragraph F mentions phone screens (tempered glass) and optical fibres as modern glass products.","evidence":{"sectionId":"p3","ref":"F","quote":"is used in car windscreens and phone screens"},"paraphraseNote":"Phone screens and optical fibres are named directly in Paragraph F — no paraphrase bridge needed here. The distractors (mirrors, magnifying lenses, camera lenses) are all real glass products, but none of them appear in this paragraph."},
+            {"number":36,"prompt":"Which TWO of the following modern glass products are mentioned in Paragraph F?","answer":["B","C"],"explanation":"Paragraph F mentions phone screens (tempered glass) and optical fibres as modern glass products.","evidence":{"sectionId":"p3","ref":"F","quote":"Optical fibres, strands of exceptionally pure glass that carry internet data as pulses of light"}}
           ]
         },
         {
@@ -184,6 +184,14 @@ VALUES (
           "questions":[
             {"number":37,"prompt":"According to Paragraph A, which TWO natural minerals are combined with silica sand to make early glass?","answer":["A","C"],"explanation":"Paragraph A states early glass was made by melting silica sand with natural minerals including soda ash and limestone.","evidence":{"sectionId":"p3","ref":"A","quote":"natural minerals including soda ash and limestone"}},
             {"number":38,"prompt":"According to Paragraph A, which TWO natural minerals are combined with silica sand to make early glass?","answer":["A","C"],"explanation":"Paragraph A states early glass was made by melting silica sand with natural minerals including soda ash and limestone.","evidence":{"sectionId":"p3","ref":"A","quote":"natural minerals including soda ash and limestone"}}
+          ]
+        },
+        {
+          "type":"multiple_choice",
+          "instructions":"Choose the correct letter, A, B, C or D.",
+          "questions":[
+            {"number":39,"prompt":"According to the passage, what was the impact of glassblowing on Roman society?","options":[{"key":"A","text":"Glass objects became household items rather than status symbols"},{"key":"B","text":"Glass vessels were only produced for wealthy Roman citizens"},{"key":"C","text":"Romans invented new glassblowing techniques"},{"key":"D","text":"Glass gradually replaced all other household materials"}],"answer":"A","explanation":"Paragraph B states that after glassblowing spread through the Roman Empire, glass vessels became common household objects rather than prestigious items — showing the shift from luxury to everyday use.","evidence":{"sectionId":"p3","ref":"B","quote":"glass vessels became common household objects rather than prestigious items"},"paraphraseNote":"'Household items rather than status symbols' (question) = 'common household objects rather than prestigious items' (passage)."},
+            {"number":40,"prompt":"According to Paragraph D, how was flat glass produced using the cylinder method?","options":[{"key":"A","text":"By pouring molten glass onto a bath of liquid tin"},{"key":"B","text":"By blowing a glass bubble, cutting it open, and flattening it while hot"},{"key":"C","text":"By spinning molten glass until it spread into a flat sheet"},{"key":"D","text":"By rolling glass through a pair of metal cylinders"}],"answer":"B","explanation":"Paragraph D describes the cylinder method: workers blow a large glass bubble, cut it open, and flatten it into a sheet while still hot.","evidence":{"sectionId":"p3","ref":"D","quote":"Workers would blow a large glass bubble, cut it open, and flatten it into a sheet while still hot"}}
           ]
         }
       ]
