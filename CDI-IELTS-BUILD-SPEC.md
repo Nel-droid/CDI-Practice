@@ -70,7 +70,15 @@ client loads licensed content themselves through an admin path later.
               "answer": "B",                 // or ["steel","iron"] or ["A","C"]
               "wordLimit": 2,                // for completion/short_answer
               "explanation": "Why the key is correct, in plain language.",
-              "evidence": { "sectionId": "p1", "ref": "C", "quote": "..." }
+              "evidence": {
+                "sectionId": "p1",           // matches section id
+                "ref": "C",                  // paragraph/part label
+                "quote": "verbatim substring of the passage/transcript"
+                // must be a single contiguous substring — no ellipsis
+              },
+              "paraphraseNote": "..."        // optional; shown in review popover
+                                             // only when question wording differs
+                                             // meaningfully from the passage phrase
             }
           ]
         }
@@ -82,11 +90,54 @@ client loads licensed content themselves through an admin path later.
 
 **Supported question types:** `multiple_choice`, `multiple_choice_multi`,
 `true_false_notgiven`, `yes_no_notgiven`, `matching`, `completion`,
-`short_answer`. (T/F/NG and Y/N/NG are button choices, never free text.)
+`short_answer`, `choose_two`. (T/F/NG and Y/N/NG are button choices, never free
+text.)
+
+**`choose_two` groups** must be authored with `"paired": true` and exactly two
+question slots sharing the same answer array (e.g. `["A","C"]`). They are scored
+via `scorePaired`: each slot claims one distinct correct letter (order-independent,
+no double-counting). Do **not** use `multiple_choice_multi` for "choose TWO"
+questions — that type uses all-or-nothing set equality and gives 0 marks for a
+half-correct answer.
 
 For **Listening**, each section also carries a `transcript` array of
 `{ id, speaker, text, evidenceForQuestions: [numbers] }` used by the feedback
 view to show and highlight the script.
+
+### In-passage / in-transcript review model (Reading + Listening)
+
+The review view is split-screen: passage or transcript on the left, per-question
+list on the right. Key behaviours established in Phase 4 that Listening inherits:
+
+- **Merge-cluster highlighting:** `mergeHighlightSpans(text, items)` finds every
+  evidence quote via `indexOf`, sorts by position, and merges overlapping or
+  adjacent spans into clusters. A cluster renders as one `<mark>` covering the
+  union of all overlapping quotes, with one `[N]` button per question inside it.
+  Two questions on the same sentence show `[5][10]` — neither is dropped.
+- **Tint logic:** all-correct cluster → green; all-wrong → red; mixed → amber.
+  Each `[N]` box is coloured independently (green/red) so a mixed span clearly
+  shows which questions are right and which are wrong.
+- **Popovers:** clicking `[N]` or the ⓘ row button opens a `position: fixed`
+  popover anchored to the trigger. Positioning flips upward when more space is
+  available above than below; `maxHeight` is set to the available space in the
+  chosen direction so the popover never overflows the viewport; internal scroll
+  with sticky header handles tall content.
+- **Listening difference:** the highlight source is a transcript paragraph, not a
+  passage paragraph. Audio is fully controllable in review (no plays-once
+  restriction). The `evidence.ref` identifies the transcript entry by `id`.
+
+### Published-test contract
+
+A published test (`published = true`) **must** satisfy all of the following.
+`validateTest.js` → `warnIfMisaligned(testRow)` checks these at test-load time
+and fires labelled `[CDI]` console warnings for any failure:
+
+1. Exactly **40 answer slots** across all `sections[].groups[].questions[]`.
+   (Band scores are suppressed when total ≠ 40.)
+2. Every question has a non-empty **`answer`** (string, or non-empty array).
+3. Every question has a non-empty **`evidence.quote`** — a single contiguous
+   verbatim substring of the passage or transcript (no ellipsis, no invented text).
+4. Every question has a non-empty **`explanation`** in plain language.
 
 ### Writing — JSON shape
 

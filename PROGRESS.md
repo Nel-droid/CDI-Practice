@@ -39,8 +39,17 @@ the service/secret key stays local-only.
 - **Phase 4 — Reading module** ✅ **COMPLETE, verified live.**
   Split-screen, 60:00 timer, section nav, question palette, flagging, all question
   types, submit + auto-submit, marking via scoreModule, save attempt, results page,
-  feedback with evidence-highlight, dashboard recent-results. Currently 122 Vitest
-  tests, all green.
+  dashboard recent-results.
+  **Review model:** in-passage view with inline [N] highlight boxes. The
+  merge-cluster renderer (`mergeHighlightSpans`) handles multiple questions on the
+  same passage sentence by stacking their [N] boxes (e.g. `[5][10]`) inside one
+  `<mark>` — mixed-correctness spans show green and red boxes side by side on an
+  amber highlight. A per-question list column has ⓘ-button popovers showing
+  Question / Your answer / Correct answer / Explanation / Evidence / Paraphrase
+  (when `paraphraseNote` is present). All content is authored (explanation,
+  evidence.quote, optional paraphraseNote) — no AI generation.
+  **Test 1 is now a full 40-question test** (Q39 and Q40 added in Phase 4
+  close-out). **148 Vitest tests, all green.**
 - **Phase 5 — Listening** ⬜ NEXT. Audio-plays-once constraint; transcript-highlight
   feedback. Same shape as Reading.
 - **Phase 6 — Writing Task 1** ⬜ Chart zoom/fullscreen/annotate + PDF export.
@@ -60,9 +69,12 @@ the service/secret key stays local-only.
   `scoreMultiSelect`). Results display joins these with "and"; short-answer alternatives
   keep "/".
 - **Band scores only show on a true 40-question test.** `scoreModule` returns
-  `band: null` when `total !== 40`; the results UI hides the band block. (Placeholder
-  Reading test is currently 38 questions after the choose-two restructure, so it shows
-  raw score only — this is correct.)
+  `band: null` when `total !== 40`; the results UI hides the band block. Test 1
+  is now 40 questions and shows band scores correctly.
+- **`validateTest.js` warns on test load** for any published test that fails either:
+  (a) total slots ≠ 40, or (b) any question is missing `answer`, `evidence.quote`,
+  or `explanation`. All warnings fire via `console.warn` at test-load time, labelled
+  `[CDI]`. This is the durable guard against blank explanations shipping.
 - **Spelling variants are opt-in per question** (`acceptSpellingVariants` flag), never
   applied globally.
 
