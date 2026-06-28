@@ -57,7 +57,9 @@ export function scoreModule(moduleData, responses) {
     : variant === 'general' ? 'general'
     : 'academic'
 
-  const band = rawToBand(raw, variantKey)
+  // Only convert raw → band for standard 40-question papers.
+  // Non-standard lengths use a different total, so the band table is meaningless.
+  const band = total === 40 ? rawToBand(raw, variantKey) : null
 
   return { raw, total, band, perQuestion }
 }

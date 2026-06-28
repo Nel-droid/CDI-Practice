@@ -43,14 +43,49 @@ describe('scoreModule — basic scoring', () => {
     expect(result.total).toBe(4)
   })
 
-  it('returns a valid numeric band', () => {
+  it('returns null band for a non-40-question module (band tables require exactly 40)', () => {
     const result = scoreModule(SAMPLE_MODULE, { 1: 'B', 2: 'A', 3: 'steel', 4: 'bridge' })
+    expect(result.band).toBeNull()
+  })
+
+  it('returns null band even when all answers are wrong on a non-40-question module', () => {
+    const result = scoreModule(SAMPLE_MODULE, { 1: 'X', 2: 'X', 3: 'X', 4: 'X' })
+    expect(result.band).toBeNull()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Band gating — only applies when total === 40
+// ---------------------------------------------------------------------------
+const FORTY_Q_MODULE = {
+  skill: 'reading',
+  variant: 'academic',
+  sections: [{
+    id: 'p1',
+    groups: [{
+      type: 'multiple_choice',
+      questions: Array.from({ length: 40 }, (_, i) => ({
+        number: i + 1,
+        answer: 'A',
+        type: 'multiple_choice',
+      })),
+    }],
+  }],
+}
+
+describe('scoreModule — band gating', () => {
+  it('returns a numeric band for a standard 40-question module', () => {
+    const allCorrect = Object.fromEntries(Array.from({ length: 40 }, (_, i) => [i + 1, 'A']))
+    const result = scoreModule(FORTY_Q_MODULE, allCorrect)
+    expect(result.total).toBe(40)
     expect(Number.isFinite(result.band)).toBe(true)
     expect(result.band).toBeGreaterThan(0)
   })
 
-  it('returns a band of 0 when all answers are wrong', () => {
-    const result = scoreModule(SAMPLE_MODULE, { 1: 'X', 2: 'X', 3: 'X', 4: 'X' })
+  it('returns band 0 when all 40 answers are wrong', () => {
+    const allWrong = Object.fromEntries(Array.from({ length: 40 }, (_, i) => [i + 1, 'Z']))
+    const result = scoreModule(FORTY_Q_MODULE, allWrong)
+    expect(result.total).toBe(40)
     expect(result.band).toBe(0)
   })
 })

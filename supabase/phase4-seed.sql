@@ -167,19 +167,23 @@ VALUES (
           ]
         },
         {
-          "type":"multiple_choice_multi",
+          "type":"choose_two",
+          "paired":true,
           "instructions":"Choose TWO letters, A–E.",
           "options":[{"key":"A","text":"Mirrors"},{"key":"B","text":"Phone screens"},{"key":"C","text":"Optical fibres"},{"key":"D","text":"Magnifying lenses"},{"key":"E","text":"Camera lenses"}],
           "questions":[
-            {"number":35,"prompt":"Which TWO of the following modern glass products are mentioned in Paragraph F?","answer":["B","C"],"explanation":"Paragraph F mentions phone screens (tempered glass) and optical fibres as modern glass products.","evidence":{"sectionId":"p3","ref":"F","quote":"phone screens... Optical fibres, strands of exceptionally pure glass"}}
+            {"number":35,"prompt":"Which TWO of the following modern glass products are mentioned in Paragraph F?","answer":["B","C"],"explanation":"Paragraph F mentions phone screens (tempered glass) and optical fibres as modern glass products.","evidence":{"sectionId":"p3","ref":"F","quote":"phone screens... Optical fibres, strands of exceptionally pure glass"}},
+            {"number":36,"prompt":"Which TWO of the following modern glass products are mentioned in Paragraph F?","answer":["B","C"],"explanation":"Paragraph F mentions phone screens (tempered glass) and optical fibres as modern glass products.","evidence":{"sectionId":"p3","ref":"F","quote":"phone screens... Optical fibres, strands of exceptionally pure glass"}}
           ]
         },
         {
-          "type":"multiple_choice_multi",
+          "type":"choose_two",
+          "paired":true,
           "instructions":"Choose TWO letters, A–E.",
           "options":[{"key":"A","text":"Soda ash"},{"key":"B","text":"Iron oxide"},{"key":"C","text":"Limestone"},{"key":"D","text":"Copper sulphate"},{"key":"E","text":"Charcoal"}],
           "questions":[
-            {"number":36,"prompt":"According to Paragraph A, which TWO natural minerals are combined with silica sand to make early glass?","answer":["A","C"],"explanation":"Paragraph A states early glass was made by melting silica sand with natural minerals including soda ash and limestone.","evidence":{"sectionId":"p3","ref":"A","quote":"natural minerals including soda ash and limestone"}}
+            {"number":37,"prompt":"According to Paragraph A, which TWO natural minerals are combined with silica sand to make early glass?","answer":["A","C"],"explanation":"Paragraph A states early glass was made by melting silica sand with natural minerals including soda ash and limestone.","evidence":{"sectionId":"p3","ref":"A","quote":"natural minerals including soda ash and limestone"}},
+            {"number":38,"prompt":"According to Paragraph A, which TWO natural minerals are combined with silica sand to make early glass?","answer":["A","C"],"explanation":"Paragraph A states early glass was made by melting silica sand with natural minerals including soda ash and limestone.","evidence":{"sectionId":"p3","ref":"A","quote":"natural minerals including soda ash and limestone"}}
           ]
         }
       ]

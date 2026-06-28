@@ -143,6 +143,14 @@ describe('Rule 6 — Paired answers', () => {
   it('is case-insensitive', () => {
     expect(scorePaired(['a', 'c'], ['C', 'A'])).toEqual([true, true])
   })
+  // Seed-data scenario: Q35/Q36 key ["B","C"], student answers A and C → 1 mark
+  it('awards one mark for ["A","C"] response against key ["B","C"] (one overlapping letter)', () => {
+    expect(scorePaired(['B', 'C'], ['A', 'C'])).toEqual([false, true])
+  })
+  // Duplicate-correct guard: ["C","C"] against key ["B","C"] must total 1, never 2
+  it('awards one mark when both slots give the same correct letter ["C","C"] against key ["B","C"]', () => {
+    expect(scorePaired(['B', 'C'], ['C', 'C'])).toEqual([true, false])
+  })
 })
 
 // ---------------------------------------------------------------------------

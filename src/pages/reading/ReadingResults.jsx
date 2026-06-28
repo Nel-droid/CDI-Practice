@@ -130,10 +130,12 @@ export default function ReadingResults() {
           </div>
 
           <div className="results-stats">
-            <div className={`stat-band ${bandClass(attempt.band ?? 0)}`}>
-              <span className="stat-value">{attempt.band ?? '—'}</span>
-              <span className="stat-label">Band</span>
-            </div>
+            {attempt.band != null && (
+              <div className={`stat-band ${bandClass(attempt.band)}`}>
+                <span className="stat-value">{attempt.band}</span>
+                <span className="stat-label">Band</span>
+              </div>
+            )}
             <div className="stat-box">
               <span className="stat-value">{marked.raw ?? 0}/{marked.total ?? perQuestion.length}</span>
               <span className="stat-label">Score</span>
@@ -169,8 +171,9 @@ export default function ReadingResults() {
                 const given = Array.isArray(pq.given)
                   ? pq.given.join(', ') || '—'
                   : (pq.given ?? '—')
+                const answerJoin = qMeta[pq.number]?.group?.type === 'choose_two' ? ' and ' : ' / '
                 const answer = Array.isArray(pq.answer)
-                  ? pq.answer.join(' / ')
+                  ? pq.answer.join(answerJoin)
                   : (pq.answer ?? '—')
                 return (
                   <tr key={pq.number} className={pq.correct ? 'row-correct' : 'row-wrong'}>
@@ -219,8 +222,9 @@ export default function ReadingResults() {
   const givenDisplay = Array.isArray(feedbackQ?.given)
     ? feedbackQ.given.join(', ') || '(no answer)'
     : (feedbackQ?.given ?? '(no answer)')
+  const feedbackAnswerJoin = meta?.group?.type === 'choose_two' ? ' and ' : ' / '
   const answerDisplay = Array.isArray(feedbackQ?.answer)
-    ? feedbackQ.answer.join(' or ')
+    ? feedbackQ.answer.join(feedbackAnswerJoin)
     : (feedbackQ?.answer ?? '—')
 
   return (

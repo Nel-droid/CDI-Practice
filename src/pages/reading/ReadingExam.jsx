@@ -218,6 +218,46 @@ function QuestionItem({ q, response, onRespond, flagged, onFlag }) {
   return null
 }
 
+// ── Choose-two group renderer ──────────────────────────────────────────────
+// Renders the shared prompt once, then one dropdown per slot (paired scoring).
+
+function ChooseTwoGroup({ group, responses, onRespond, flagged, onFlag }) {
+  const sharedPrompt = group.questions?.[0]?.prompt
+  return (
+    <>
+      {group.options && (
+        <div className="matching-options-box">
+          <p className="matching-options-label">Options</p>
+          <ul className="matching-options-list">
+            {group.options.map(opt => (
+              <li key={opt.key} className="matching-option-item">
+                <span className="opt-key">{opt.key}.</span> {opt.text}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {sharedPrompt && <p className="q-prompt">{sharedPrompt}</p>}
+      {group.questions?.map(q => (
+        <div key={q.number} className="question-item" id={`q${q.number}`}>
+          <QuestionHeader number={q.number} flagged={flagged} onFlag={onFlag} />
+          <select
+            className="matching-select"
+            value={responses[q.number] ?? ''}
+            onChange={e => onRespond(q.number, e.target.value || null)}
+            aria-label={`Choice for question ${q.number}`}
+          >
+            <option value="">— Choose a letter —</option>
+            {group.options?.map(opt => (
+              <option key={opt.key} value={opt.key}>{opt.key}. {opt.text}</option>
+            ))}
+          </select>
+        </div>
+      ))}
+    </>
+  )
+}
+
 // ── Questions panel ────────────────────────────────────────────────────────
 
 function QuestionsPanel({ section, responses, flagged, onRespond, onFlag }) {
@@ -254,16 +294,25 @@ function QuestionsPanel({ section, responses, flagged, onRespond, onFlag }) {
               <p className="group-inst-text">{group.instructions}</p>
             </div>
           )}
-          {group.questions?.map(q => (
-            <QuestionItem
-              key={q.number}
-              q={{ ...q, group }}
-              response={responses[q.number]}
-              onRespond={onRespond}
-              flagged={flagged}
-              onFlag={onFlag}
-            />
-          ))}
+          {group.type === 'choose_two'
+            ? <ChooseTwoGroup
+                group={group}
+                responses={responses}
+                onRespond={onRespond}
+                flagged={flagged}
+                onFlag={onFlag}
+              />
+            : group.questions?.map(q => (
+                <QuestionItem
+                  key={q.number}
+                  q={{ ...q, group }}
+                  response={responses[q.number]}
+                  onRespond={onRespond}
+                  flagged={flagged}
+                  onFlag={onFlag}
+                />
+              ))
+          }
         </div>
       ))}
     </div>
