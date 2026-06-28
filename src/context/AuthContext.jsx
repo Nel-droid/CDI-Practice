@@ -19,10 +19,14 @@ export function AuthProvider({ children }) {
         setUser(currentUser)
 
         if (event === 'SIGNED_IN' && currentUser) {
-          await supabase
+          // Fire-and-forget: a failure here must not block auth state
+          supabase
             .from('profiles')
             .update({ last_active_at: new Date().toISOString() })
             .eq('id', currentUser.id)
+            .then(({ error }) => {
+              if (error) console.warn('last_active_at update skipped:', error.message)
+            })
         }
       }
     )

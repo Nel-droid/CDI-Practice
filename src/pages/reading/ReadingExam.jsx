@@ -331,10 +331,14 @@ export default function ReadingExam() {
       },
     }).eq('id', attemptId)
 
-    await supabase
+    // Fire-and-forget: profile timestamp update is non-critical
+    supabase
       .from('profiles')
       .update({ last_active_at: new Date().toISOString() })
       .eq('id', user.id)
+      .then(({ error }) => {
+        if (error) console.warn('last_active_at update skipped:', error.message)
+      })
 
     navigate(`/reading/results/${attemptId}`)
   }, [test, responses, attemptId, user, navigate])
