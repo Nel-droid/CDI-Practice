@@ -5,11 +5,13 @@ import AppShell from './components/AppShell'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
-import Listening from './pages/Listening'
 import Writing from './pages/Writing'
 import ReadingHome from './pages/reading/ReadingHome'
 import ReadingExam from './pages/reading/ReadingExam'
 import ReadingResults from './pages/reading/ReadingResults'
+import ListeningHome from './pages/listening/ListeningHome'
+import ListeningExam from './pages/listening/ListeningExam'
+import ListeningResults from './pages/listening/ListeningResults'
 
 export default function App() {
   return (
@@ -19,10 +21,14 @@ export default function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Reading exam — full-screen, own header, no AppShell */}
+        {/* Full-screen exam pages — own header, no AppShell */}
         <Route
           path="/reading/exam/:testId"
           element={<ProtectedRoute><ReadingExam /></ProtectedRoute>}
+        />
+        <Route
+          path="/listening/exam/:testId"
+          element={<ProtectedRoute><ListeningExam /></ProtectedRoute>}
         />
 
         {/* Protected area — AppShell with nav */}
@@ -41,7 +47,11 @@ export default function App() {
           />
           <Route
             path="/listening"
-            element={<ProtectedRoute><Listening /></ProtectedRoute>}
+            element={<ProtectedRoute><ListeningHome /></ProtectedRoute>}
+          />
+          <Route
+            path="/listening/results/:attemptId"
+            element={<ProtectedRoute><ListeningResults /></ProtectedRoute>}
           />
           <Route
             path="/writing"

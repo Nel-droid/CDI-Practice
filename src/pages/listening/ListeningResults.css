@@ -1,0 +1,153 @@
+.lr-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.lr-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  color: #666;
+}
+
+.lr-error {
+  color: #b91c1c;
+  font-size: 0.95rem;
+}
+
+/* ── Summary card ─────────────────────────────────────────────── */
+
+.lr-summary-card {
+  background: #fff;
+  border: 1px solid #d0daf0;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.lr-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 1.5rem;
+}
+
+.lr-score-row {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 1.25rem;
+}
+
+.lr-score-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.lr-score-value {
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.lr-score-denom {
+  font-size: 1.5rem;
+  color: #aaa;
+  font-weight: 400;
+}
+
+.lr-score-label {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.lr-correct-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.lr-correct-chip {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.3em 0.8em;
+  border-radius: 20px;
+}
+
+.lr-correct-chip.correct {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.lr-correct-chip.incorrect {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Question grid card ───────────────────────────────────────── */
+
+.lr-grid-card {
+  background: #fff;
+  border: 1px solid #d0daf0;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.lr-section-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 1rem;
+}
+
+.lr-question-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.lr-q-chip {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.lr-q-chip.correct {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.lr-q-chip.incorrect {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.lr-review-note {
+  font-size: 0.82rem;
+  color: #999;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Actions ──────────────────────────────────────────────────── */
+
+.lr-actions {
+  display: flex;
+  gap: 1rem;
+}
