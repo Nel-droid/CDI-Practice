@@ -1,0 +1,187 @@
+/* The band scale as a live instrument — see BandRule.jsx */
+
+/* Top padding reserves room for the target flag, which sits above the rule */
+.brule {
+  width: 100%;
+  padding-top: 1.5rem;
+}
+
+.brule-track {
+  position: relative;
+  height: 4.25rem;
+}
+
+.brule--sm .brule-track { height: 3rem; }
+
+/* Baseline */
+.brule-track::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-text);
+}
+
+/* Span achieved so far */
+.brule-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--color-primary);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brule-fill--reached { background: var(--color-gold); }
+
+/* Projected span — where the current rate of improvement is heading. Hatched
+   and faint so it reads as a forecast, distinct from the solid achieved span. */
+.brule-fill-projected {
+  position: absolute;
+  top: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-primary) 0 4px,
+    transparent 4px 8px
+  );
+  opacity: 0.55;
+  transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Ticks ── */
+
+.brule-ticks {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+}
+
+.brule-tg { position: relative; flex: 1 1 0; height: 100%; }
+.brule-tg:last-child { flex: 0 0 0; }
+
+.brule-tick { position: absolute; top: 0; background: var(--color-text); }
+
+.brule-tick--major { left: 0; width: 2px; height: 16px; }
+
+.brule-tick--minor {
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  background: var(--color-text-muted);
+}
+
+.brule-label {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  transform: translateX(-50%);
+  font-size: var(--t-sm);
+  color: var(--color-text-muted);
+}
+
+.brule--sm .brule-tick--major { height: 11px; }
+.brule--sm .brule-tick--minor { height: 6px; }
+.brule--sm .brule-label { top: 15px; font-size: var(--t-xs); }
+
+/* ── Target ── */
+
+.brule-target {
+  position: absolute;
+  top: -4px;
+  bottom: 0;
+  width: 0;
+  border-left: 2px dashed var(--color-gold);
+  pointer-events: none;
+}
+
+/* Sits above the baseline so it never collides with the numeral row below */
+.brule-flag {
+  position: absolute;
+  top: -1.35rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--t-xs);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+/* ── Current position ── */
+
+.brule-now {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brule-now-dot {
+  width: 13px;
+  height: 13px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid var(--color-card);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.brule-now-val {
+  margin-top: 0.4rem;
+  padding: 0.1rem 0.4rem;
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+.brule--sm .brule-now-dot { width: 10px; height: 10px; margin-top: -4px; }
+.brule--sm .brule-now-val { font-size: var(--t-xs); }
+
+/* ── Predicted position (hollow marker — a forecast, not a result) ── */
+
+.brule-predicted {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.brule-predicted-dot {
+  width: 12px;
+  height: 12px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--color-card);
+  border: 2px solid var(--color-primary);
+}
+
+.brule-predicted-val {
+  margin-top: 0.4rem;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.brule--sm .brule-predicted-dot { width: 9px; height: 9px; margin-top: -3.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .brule-fill,
+  .brule-now { transition: none; }
+}
+
+@media (max-width: 560px) {
+  .brule-flag { display: none; }
+}

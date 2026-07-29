@@ -4,6 +4,10 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { scoreModule } from '../../lib/marking/index'
 import { warnIfMisaligned } from '../../lib/marking/validateTest'
+import { summariseByType } from '../../lib/analytics/questionTypes'
+import { ThemeToggle } from '../../components/ThemeToggle'
+import { HighlightBar } from '../../components/HighlightToolbar'
+import { useHighlight } from '../../lib/useHighlight'
 import '../reading/ReadingExam.css'
 import './ListeningExam.css'
 
@@ -36,90 +40,77 @@ function allQuestions(test) {
 
 // ── Question renderers ─────────────────────────────────────────────────────
 
-function FlagBtn({ number, flagged, onFlag }) {
-  const active = flagged.has(number)
-  return (
-    <button
-      className={`flag-btn ${active ? 'flagged' : ''}`}
-      onClick={() => onFlag(number)}
-      aria-pressed={active}
-      title={active ? 'Remove flag' : 'Flag for review'}
-    >
-      {active ? '⚑ Flagged' : '⚐ Flag'}
-    </button>
-  )
+// Maps a T/F/NG or Y/N/NG option to its colour-coded selected state.
+function selClass(opt) {
+  const v = (opt ?? '').toUpperCase()
+  if (v === 'TRUE' || v === 'YES') return 'sel-t'
+  if (v === 'FALSE' || v === 'NO') return 'sel-f'
+  return 'sel-n'
 }
 
-function QuestionHeader({ number, flagged, onFlag }) {
+function TFNGQuestion({ q, opts, response, onRespond }) {
   return (
-    <div className="q-header">
-      <span className="q-number">{number}</span>
-      <FlagBtn number={number} flagged={flagged} onFlag={onFlag} />
-    </div>
-  )
-}
-
-function TFNGQuestion({ q, opts, response, onRespond, flagged, onFlag }) {
-  return (
-    <div className="question-item" id={`q${q.number}`}>
-      <QuestionHeader number={q.number} flagged={flagged} onFlag={onFlag} />
-      <p className="q-prompt">{q.prompt}</p>
-      <div className="choice-buttons" role="group" aria-label={`Answer for question ${q.number}`}>
-        {opts.map(opt => (
-          <button
-            key={opt}
-            className={`choice-btn ${response === opt ? 'selected' : ''}`}
-            onClick={() => onRespond(q.number, response === opt ? null : opt)}
-            aria-pressed={response === opt}
-          >
-            {opt}
-          </button>
-        ))}
+    <div className="question-row" id={`q${q.number}`}>
+      <span className="q-num">{q.number}</span>
+      <div className="question-row-body">
+        <p className="q-prompt">{q.prompt}</p>
+        <div className="tfng-btns" role="group" aria-label={`Answer for question ${q.number}`}>
+          {opts.map(opt => (
+            <button
+              key={opt}
+              className={`tfng-btn ${response === opt ? `selected ${selClass(opt)}` : ''}`}
+              onClick={() => onRespond(q.number, response === opt ? null : opt)}
+              aria-pressed={response === opt}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )
 }
 
-function MCQQuestion({ q, response, onRespond, flagged, onFlag }) {
+function MCQQuestion({ q, response, onRespond }) {
   return (
-    <div className="question-item" id={`q${q.number}`}>
-      <QuestionHeader number={q.number} flagged={flagged} onFlag={onFlag} />
-      <p className="q-prompt">{q.prompt}</p>
-      <div className="radio-options" role="radiogroup" aria-label={`Answer for question ${q.number}`}>
-        {q.options?.map(opt => (
-          <label key={opt.key} className={`radio-option ${response === opt.key ? 'selected' : ''}`}>
-            <input
-              type="radio"
-              name={`q${q.number}`}
-              value={opt.key}
-              checked={response === opt.key}
-              onChange={() => onRespond(q.number, opt.key)}
-            />
-            <span className="opt-key">{opt.key}</span>
-            <span className="opt-text">{opt.text}</span>
-          </label>
-        ))}
+    <div className="question-row" id={`q${q.number}`}>
+      <span className="q-num">{q.number}</span>
+      <div className="question-row-body">
+        <p className="q-prompt">{q.prompt}</p>
+        <div className="mc-opts" role="radiogroup" aria-label={`Answer for question ${q.number}`}>
+          {q.options?.map(opt => (
+            <label key={opt.key} className={`mc-opt ${response === opt.key ? 'selected' : ''}`}>
+              <input
+                type="radio"
+                name={`q${q.number}`}
+                value={opt.key}
+                checked={response === opt.key}
+                onChange={() => onRespond(q.number, opt.key)}
+              />
+              <span className="opt-letter">{opt.key}</span>
+              <span className="opt-text">{opt.text}</span>
+            </label>
+          ))}
+        </div>
       </div>
     </div>
   )
 }
 
-function MatchingQuestion({ q, group, response, onRespond, flagged, onFlag }) {
+function MatchingQuestion({ q, group, response, onRespond }) {
   return (
-    <div className="question-item" id={`q${q.number}`}>
-      <QuestionHeader number={q.number} flagged={flagged} onFlag={onFlag} />
-      <p className="q-prompt">{q.prompt}</p>
+    <div className="match-row" id={`q${q.number}`}>
+      <span className="q-num">{q.number}</span>
+      <span className="match-label">{q.prompt}</span>
       <select
-        className="matching-select"
+        className="match-select"
         value={response ?? ''}
         onChange={e => onRespond(q.number, e.target.value || null)}
         aria-label={`Answer for question ${q.number}`}
       >
-        <option value="">— Choose —</option>
+        <option value="">–</option>
         {group.options?.map(opt => (
-          <option key={opt.key} value={opt.key}>
-            {opt.text !== opt.key ? `${opt.key}. ${opt.text}` : opt.key}
-          </option>
+          <option key={opt.key} value={opt.key}>{opt.key}</option>
         ))}
       </select>
     </div>
@@ -127,90 +118,354 @@ function MatchingQuestion({ q, group, response, onRespond, flagged, onFlag }) {
 }
 
 // Listening-specific: word-limit hint says "from what you hear", not "from the passage"
-function TextQuestion({ q, response, onRespond, flagged, onFlag }) {
+function TextQuestion({ q, response, onRespond }) {
   return (
-    <div className="question-item" id={`q${q.number}`}>
-      <QuestionHeader number={q.number} flagged={flagged} onFlag={onFlag} />
-      <p className="q-prompt">{q.prompt}</p>
-      {q.wordLimit && (
-        <p className="q-hint">
-          No more than {q.wordLimit} word{q.wordLimit > 1 ? 's' : ''} from what you hear
-        </p>
-      )}
-      <input
-        type="text"
-        className="text-answer"
-        value={response ?? ''}
-        onChange={e => onRespond(q.number, e.target.value)}
-        placeholder="Your answer…"
-        aria-label={`Answer for question ${q.number}`}
-      />
+    <div className="question-row" id={`q${q.number}`}>
+      <span className="q-num">{q.number}</span>
+      <div className="question-row-body">
+        <p className="q-prompt">{q.prompt}</p>
+        {q.wordLimit && (
+          <p className="q-hint">
+            No more than {q.wordLimit} word{q.wordLimit > 1 ? 's' : ''} from what you hear
+          </p>
+        )}
+        <input
+          type="text"
+          className="text-answer"
+          value={response ?? ''}
+          onChange={e => onRespond(q.number, e.target.value)}
+          placeholder="Your answer…"
+          aria-label={`Answer for question ${q.number}`}
+        />
+      </div>
     </div>
   )
 }
 
-function QuestionItem({ q, response, onRespond, flagged, onFlag }) {
+function QuestionItem({ q, response, onRespond }) {
   const { group } = q
   const type = group.type
   if (type === 'true_false_notgiven') {
-    return <TFNGQuestion q={q} opts={['TRUE', 'FALSE', 'NOT GIVEN']} response={response} onRespond={onRespond} flagged={flagged} onFlag={onFlag} />
+    return <TFNGQuestion q={q} opts={['TRUE', 'FALSE', 'NOT GIVEN']} response={response} onRespond={onRespond} />
   }
   if (type === 'yes_no_notgiven') {
-    return <TFNGQuestion q={q} opts={['YES', 'NO', 'NOT GIVEN']} response={response} onRespond={onRespond} flagged={flagged} onFlag={onFlag} />
+    return <TFNGQuestion q={q} opts={['YES', 'NO', 'NOT GIVEN']} response={response} onRespond={onRespond} />
   }
   if (type === 'multiple_choice') {
-    return <MCQQuestion q={q} response={response} onRespond={onRespond} flagged={flagged} onFlag={onFlag} />
+    return <MCQQuestion q={q} response={response} onRespond={onRespond} />
   }
   if (type === 'matching') {
-    return <MatchingQuestion q={q} group={group} response={response} onRespond={onRespond} flagged={flagged} onFlag={onFlag} />
+    return <MatchingQuestion q={q} group={group} response={response} onRespond={onRespond} />
   }
   if (type === 'completion' || type === 'short_answer') {
-    return <TextQuestion q={q} response={response} onRespond={onRespond} flagged={flagged} onFlag={onFlag} />
+    return <TextQuestion q={q} response={response} onRespond={onRespond} />
   }
   return null
 }
 
+// ── Inline completion group ────────────────────────────────────────────────
+// Renders completion questions as inline blanks within flowing note text.
+// When group.formContent is present, interleaves section headers, static
+// lines, and sub-bullets exactly as they appear on the source worksheet.
+
+function CompletionInlineGroup({ group, responses, onRespond }) {
+  const qMap = Object.fromEntries((group.questions ?? []).map(q => [q.number, q]))
+
+  const renderLine = (line, i) => {
+    if (line.kind === 'header') {
+      return <div key={i} className="note-header">{line.text}</div>
+    }
+    if (line.kind === 'subheader') {
+      return <div key={i} className="note-subheader">{line.text}</div>
+    }
+    if (line.kind === 'static') {
+      return (
+        <div key={i} className="note-row">
+          <span className="note-row-main">
+            {!line.noBullet && <span className="note-bullet">•&nbsp;</span>}
+            {line.text}
+          </span>
+        </div>
+      )
+    }
+    if (line.kind === 'question') {
+      const q = qMap[line.number]
+      if (!q) return null
+      const parts   = (q.prompt ?? '').split('_______')
+      const before  = parts[0] ?? ''
+      const after   = parts.slice(1).join('')
+      const isSub   = line.sub === true
+      const noBullet = line.noBullet === true
+      return (
+        // key MUST be the array index i (like every other renderLine branch),
+        // never q.number — a static at index N would otherwise collide with the
+        // question numbered N, duplicating rows. id={`q…`} handles scroll-to.
+        <div
+          key={i}
+          className={`note-row${isSub ? ' note-row--sub' : ''}`}
+          id={`q${q.number}`}
+        >
+          <span className="note-row-main">
+            {!noBullet && (
+              isSub
+                ? <span className="note-bullet">&ndash;&nbsp;</span>
+                : <span className="note-bullet">•&nbsp;</span>
+            )}
+            {before}
+            <span className="note-q-num">&thinsp;{q.number}&thinsp;</span>
+            <input
+              className="blank-input"
+              type="text"
+              value={responses[q.number] ?? ''}
+              onChange={e => onRespond(q.number, e.target.value)}
+              aria-label={`Answer for question ${q.number}`}
+              title={q.wordLimit ? `No more than ${q.wordLimit} word${q.wordLimit !== 1 ? 's' : ''} from what you hear` : undefined}
+              placeholder="……"
+            />
+            {after}
+          </span>
+        </div>
+      )
+    }
+    return null
+  }
+
+  return (
+    <div className="note-box">
+      {group.formTitle && (
+        <div className="note-box-title">{group.formTitle}</div>
+      )}
+      {group.formContent
+        ? group.formContent.map(renderLine)
+        : group.questions?.map(q => {
+            const parts = (q.prompt ?? '').split('_______')
+            const before = parts[0] ?? ''
+            const after  = parts.slice(1).join('')
+            return (
+              <div key={q.number} className="note-row" id={`q${q.number}`}>
+                <span className="note-row-main">
+                  <span className="note-bullet">•&nbsp;</span>
+                  {before}
+                  <span className="note-q-num">&thinsp;{q.number}&thinsp;</span>
+                  <input
+                    className="blank-input"
+                    type="text"
+                    value={responses[q.number] ?? ''}
+                    onChange={e => onRespond(q.number, e.target.value)}
+                    aria-label={`Answer for question ${q.number}`}
+                    title={q.wordLimit ? `No more than ${q.wordLimit} word${q.wordLimit !== 1 ? 's' : ''} from what you hear` : undefined}
+                    placeholder="……"
+                  />
+                  {after}
+                </span>
+              </div>
+            )
+          })
+      }
+    </div>
+  )
+}
+
 // ── Questions panel ────────────────────────────────────────────────────────
 
-function QuestionsPanel({ section, responses, flagged, onRespond, onFlag }) {
+// Map/diagram image for a question group — fetched the same way as audio:
+// a time-limited signed URL from Storage, never a public URL.
+function DiagramImage({ path }) {
+  const [src, setSrc] = useState(null)
+  const [zoomed, setZoomed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setSrc(null)
+    supabase.storage
+      .from('listening-images')
+      .createSignedUrl(path, 3600)
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error || !data?.signedUrl) {
+          console.error('[CDI] Diagram image signed URL fetch failed:', error)
+          return
+        }
+        setSrc(data.signedUrl)
+      })
+    return () => { cancelled = true }
+  }, [path])
+
+  if (!src) return null
+
+  return (
+    <>
+      <button
+        type="button"
+        className="diagram-image-trigger"
+        onClick={() => setZoomed(true)}
+        aria-label="Enlarge diagram"
+      >
+        <img className="diagram-image" src={src} alt="Question diagram" />
+      </button>
+      {zoomed && (
+        <div className="diagram-image-overlay" onClick={() => setZoomed(false)}>
+          <img className="diagram-image-zoomed" src={src} alt="Question diagram, enlarged" />
+        </div>
+      )}
+    </>
+  )
+}
+
+// Flow-chart / summary / notes with a LETTER word bank: inline blanks filled
+// from a lettered box (e.g. "Choose FIVE answers from the box, A–H").
+function SummaryCompletionGroup({ group, responses, onRespond }) {
+  const text = group.summaryText ?? ''
+  const markerRe = /\{(\d+)\}/g
+  const parts = []
+  let last = 0
+  let m
+  while ((m = markerRe.exec(text)) !== null) {
+    if (m.index > last) parts.push({ kind: 'text', text: text.slice(last, m.index) })
+    const qNum = parseInt(m[1], 10)
+    parts.push({ kind: 'blank', qNum })
+    last = m.index + m[0].length
+  }
+  if (last < text.length) parts.push({ kind: 'text', text: text.slice(last) })
+
+  const hasWordBank = Array.isArray(group.wordBank) && group.wordBank.length > 0
+
+  return (
+    <div className="summary-passage">
+      {hasWordBank && (
+        <ol className="matching-options-list options-grid summary-word-bank">
+          {group.wordBank.map(opt => (
+            <li key={opt.key} className="matching-option-item">
+              <span className="opt-key">{opt.key}.</span> {opt.text}
+            </li>
+          ))}
+        </ol>
+      )}
+      <p className="summary-text">
+        {parts.map((part, i) => {
+          if (part.kind === 'text') return <span key={i}>{part.text}</span>
+          return (
+            <span key={i} className="summary-blank-wrap">
+              <sup className="summary-q-num">{part.qNum}</sup>
+              <select
+                id={`q${part.qNum}`}
+                className="match-gap-select summary-gap-select"
+                value={responses[part.qNum] ?? ''}
+                onChange={e => onRespond(part.qNum, e.target.value || null)}
+                aria-label={`Answer for question ${part.qNum}`}
+              >
+                <option value="">–</option>
+                {group.wordBank?.map(opt => (
+                  <option key={opt.key} value={opt.key}>{opt.key}. {opt.text}</option>
+                ))}
+              </select>
+            </span>
+          )
+        })}
+      </p>
+    </div>
+  )
+}
+
+// Paired "Choose TWO letters" group — scored order-independently by scoreModule
+// (Rule 6). Slots fill in pick order; both hold the shared two-letter answer.
+function ChooseTwoGroup({ group, responses, onRespond }) {
+  const questions = group.questions ?? []
+  const max = questions.length
+  const selected = questions.map(q => responses[q.number]).filter(Boolean)
+
+  function toggle(key) {
+    if (selected.includes(key)) {
+      const slot = questions.find(q => responses[q.number] === key)
+      if (slot) onRespond(slot.number, null)
+    } else if (selected.length < max) {
+      const empty = questions.find(q => !responses[q.number])
+      if (empty) onRespond(empty.number, key)
+    }
+  }
+
+  return (
+    <>
+      {questions.map(q => <span key={q.number} id={`q${q.number}`} />)}
+      <p className="q-hint">Select {max} letters. ({selected.length}/{max} chosen)</p>
+      <div className="mc-opts" role="group" aria-label={`Choose ${max} answers`}>
+        {group.options?.map(opt => {
+          const isSelected = selected.includes(opt.key)
+          const isDisabled = !isSelected && selected.length >= max
+          return (
+            <label
+              key={opt.key}
+              className={`mc-opt${isSelected ? ' selected' : ''}${isDisabled ? ' disabled' : ''}`}
+            >
+              <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={() => toggle(opt.key)}
+                disabled={isDisabled}
+              />
+              <span className="opt-letter">{opt.key}</span>
+              <span className="opt-text">{opt.text}</span>
+            </label>
+          )
+        })}
+      </div>
+    </>
+  )
+}
+
+function QuestionsPanel({ section, responses, onRespond }) {
   return (
     <div className="questions-panel">
       {section.groups?.map((group, gi) => {
-        // Only show the options box when options carry meaningful text (not just "A", "B"...)
-        const hasDescriptiveOptions = group.options?.some(opt => opt.text !== opt.key)
+        const firstQ = group.questions?.[0]?.number
+        const lastQ  = group.questions?.[group.questions.length - 1]?.number
+        const range  = firstQ == null ? null
+          : firstQ === lastQ ? `Question ${firstQ}`
+          : `Questions ${firstQ}–${lastQ}`
+        const hasDescOpts = group.options?.some(opt => opt.text !== opt.key)
 
         return (
           <div key={gi} className="question-group">
+            {range && <div className="q-section-range">{range}</div>}
+
             {group.instructions && (
-              <div className="group-instructions">
-                {group.type === 'matching' && hasDescriptiveOptions && (
-                  <div className="matching-options-box">
-                    <p className="matching-options-label">Options</p>
-                    <ul className="matching-options-list">
-                      {group.options.map(opt => (
-                        <li key={opt.key} className="matching-option-item">
-                          <span className="opt-key">{opt.key}.</span> {opt.text}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <p className="group-inst-text">{group.instructions}</p>
+              <p className="group-inst-text">{group.instructions}</p>
+            )}
+
+            {/* Map / diagram image (above questions, signed URL from Storage) */}
+            {(group.mapImage || group.diagramImage) && (
+              <DiagramImage path={group.mapImage ?? group.diagramImage} />
+            )}
+
+            {/* Options box — only when options carry meaningful text */}
+            {group.type === 'matching' && hasDescOpts && (
+              <div className="matching-options-box matching-options-sticky">
+                <p className="matching-options-label">{group.optionsLabel ?? 'Options'}</p>
+                <ul className="matching-options-list">
+                  {group.options.map(opt => (
+                    <li key={opt.key} className="matching-option-item">
+                      <span className="opt-key">{opt.key}.</span> {opt.text}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
-            {group.formTitle && (
-              <p className="group-form-title">{group.formTitle}</p>
-            )}
-            {group.questions?.map(q => (
-              <QuestionItem
-                key={q.number}
-                q={{ ...q, group }}
-                response={responses[q.number]}
-                onRespond={onRespond}
-                flagged={flagged}
-                onFlag={onFlag}
-              />
-            ))}
+
+            {group.summaryText
+              ? <SummaryCompletionGroup group={group} responses={responses} onRespond={onRespond} />
+              : group.type === 'completion'
+              ? <CompletionInlineGroup group={group} responses={responses} onRespond={onRespond} />
+              : group.type === 'choose_two'
+              ? <ChooseTwoGroup group={group} responses={responses} onRespond={onRespond} />
+              : group.questions?.map(q => (
+                  <QuestionItem
+                    key={q.number}
+                    q={{ ...q, group }}
+                    response={responses[q.number]}
+                    onRespond={onRespond}
+                  />
+                ))
+            }
           </div>
         )
       })}
@@ -218,50 +473,49 @@ function QuestionsPanel({ section, responses, flagged, onRespond, onFlag }) {
   )
 }
 
-// ── Audio panel (left column) ──────────────────────────────────────────────
+// ── Audio status bar ────────────────────────────────────────────────────────
+// One continuous recording plays straight through. The bar reports progress
+// but is deliberately non-interactive — the candidate cannot pause, seek, or
+// replay, exactly as in the real exam.
 
-function AudioPanel({ sections, currentPartIdx, audioElapsed, audioDuration, audioComplete, autoplayBlocked, onStartAudio }) {
-  const pct = audioDuration > 0 ? Math.min(100, (audioElapsed / audioDuration) * 100) : 0
+function AudioStatusBar({
+  elapsed, duration, complete, autoplayBlocked, error, onStart,
+}) {
+  const pct = duration > 0 ? Math.min(100, (elapsed / duration) * 100) : 0
 
   return (
-    <div className="audio-panel">
-      <div className="audio-part-heading">
-        {audioComplete
-          ? <span className="audio-badge audio-badge--done">✓ Audio complete</span>
-          : <span className="audio-badge audio-badge--playing">▶ Part {currentPartIdx + 1} of {sections.length}</span>
-        }
+    <div className="audio-bar" role="group" aria-label="Test audio">
+      <div className="audio-bar-status">
+        {error ? (
+          <span className="audio-badge audio-badge--error">Audio unavailable</span>
+        ) : complete ? (
+          <span className="audio-badge audio-badge--done">Audio finished</span>
+        ) : autoplayBlocked ? (
+          <span className="audio-badge audio-badge--wait">Ready to play</span>
+        ) : (
+          <span className="audio-badge audio-badge--playing">
+            <span className="audio-eq" aria-hidden="true"><i /><i /><i /></span>
+            Playing
+          </span>
+        )}
       </div>
 
-      {/* Non-interactive progress bar — pointer-events: none in CSS */}
-      <div className="audio-track" aria-hidden="true">
-        <div className="audio-track-fill" style={{ width: `${pct}%` }} />
-      </div>
-      <div className="audio-time-row" aria-hidden="true">
-        <span>{fmtTime(Math.floor(audioElapsed))}</span>
-        <span>{audioDuration > 0 ? fmtTime(Math.floor(audioDuration)) : '--:--'}</span>
-      </div>
-
-      {/* Fallback button — only shown if browser blocked autoplay */}
-      {autoplayBlocked && (
-        <button className="btn btn-primary audio-start-btn" onClick={onStartAudio}>
+      {autoplayBlocked && !complete && !error ? (
+        <button className="btn btn-primary audio-start-btn" onClick={onStart}>
           ▶ Start audio
         </button>
+      ) : (
+        <>
+          <div className="audio-track" aria-hidden="true">
+            <div className="audio-track-fill" style={{ width: `${pct}%` }} />
+          </div>
+          <span className="audio-time num" aria-hidden="true">
+            {fmtTime(Math.floor(elapsed))} / {duration > 0 ? fmtTime(Math.floor(duration)) : '--:--'}
+          </span>
+        </>
       )}
 
-      <p className="audio-rule-note">
-        Audio plays once only. Pause, rewind, and replay are not available during the test.
-      </p>
-
-      <div className="audio-parts-list" aria-hidden="true">
-        {sections.map((sec, i) => (
-          <div
-            key={sec.id}
-            className={`audio-part-item${i === currentPartIdx && !audioComplete ? ' current' : ''}${i < currentPartIdx || audioComplete ? ' done' : ''}`}
-          >
-            {i < currentPartIdx || audioComplete ? '✓' : i === currentPartIdx ? '▶' : '○'} {sec.title}
-          </div>
-        ))}
-      </div>
+      <span className="audio-note">Plays once · no pause or rewind</span>
     </div>
   )
 }
@@ -275,21 +529,26 @@ export default function ListeningExam() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  const { bar, savedRange, onMouseUp, onTouchEnd, hide } = useHighlight()
+
   const [test, setTest] = useState(null)
+  const [testLabel, setTestLabel] = useState('')
   const [loadError, setLoadError] = useState('')
   const [responses, setResponses] = useState({})
-  const [flagged, setFlagged] = useState(new Set())
   const [activeSection, setActiveSection] = useState(0)
+  const [activeQuestion, setActiveQuestion] = useState(1)
   const [timeLeft, setTimeLeft] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
 
-  // Audio state
-  const [currentPartIdx, setCurrentPartIdx] = useState(0)
+  // Audio state — one continuous recording per test (all four parts), matching
+  // the real exam, which plays straight through without stopping between parts.
   const [audioSrc, setAudioSrc] = useState(null)
   const [audioElapsed, setAudioElapsed] = useState(0)
   const [audioDuration, setAudioDuration] = useState(0)
   const [audioComplete, setAudioComplete] = useState(false)
+  const [audioError, setAudioError] = useState(false)
   const [autoplayBlocked, setAutoplayBlocked] = useState(false)
 
   const audioRef = useRef(null)
@@ -297,12 +556,6 @@ export default function ListeningExam() {
   const furthestRef = useRef(0)
   const startedAtRef = useRef(null)
   const submittedRef = useRef(false)
-
-  // Keep a ref so the onEnded handler always sees fresh state without stale closures
-  const audioStateRef = useRef({ currentPartIdx: 0, sections: [] })
-  useEffect(() => {
-    audioStateRef.current = { currentPartIdx, sections: test?.sections ?? [] }
-  })
 
   // ── Load test ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -314,34 +567,36 @@ export default function ListeningExam() {
       .then(({ data, error }) => {
         if (error || !data) { setLoadError('Test not found.'); return }
         setTest(data.content)
+        setTestLabel(data.test_label ?? '')
         setTimeLeft(data.duration_seconds)
         startedAtRef.current = Date.now()
         warnIfMisaligned(data)
       })
   }, [testId])
 
-  // ── Fetch signed URL when part changes ────────────────────────────────
+  // ── Fetch the signed URL once, for the whole-test recording ────────────
   //
-  // audioPath is stored as "Part 1.mp3" (capital P, space).
-  // supabase.storage.createSignedUrl() passes the path in the JSON request
-  // body — the JS client handles spaces in the string without manual encoding.
-  // The returned signedUrl from Supabase is already properly URL-encoded.
+  // audioPath is the single continuous file, e.g. "Cambridge 16 Test 1.mp3".
+  // createSignedUrl passes the path in the request body, so spaces need no
+  // manual encoding; the returned URL is already encoded. The file is private,
+  // reached only through this short-lived signed URL — never a public URL.
   useEffect(() => {
-    if (!test) return
-    const sections = test.sections ?? []
-    if (currentPartIdx >= sections.length) return
-    const path = sections[currentPartIdx].audioPath
+    if (!test?.audioPath) return
+    let cancelled = false
     supabase.storage
       .from('listening-audio')
-      .createSignedUrl(path, 3600)
+      .createSignedUrl(test.audioPath, 3600)
       .then(({ data, error }) => {
+        if (cancelled) return
         if (error || !data?.signedUrl) {
           console.error('[CDI] Audio signed URL fetch failed:', error)
+          setAudioError(true)
           return
         }
         setAudioSrc(data.signedUrl)
       })
-  }, [test, currentPartIdx])
+    return () => { cancelled = true }
+  }, [test])
 
   // ── Play when signed URL arrives ──────────────────────────────────────
   useEffect(() => {
@@ -390,15 +645,8 @@ export default function ListeningExam() {
     if (audio && isFinite(audio.duration)) setAudioDuration(audio.duration)
   }
 
-  function handlePartEnded() {
-    const { currentPartIdx: idx, sections } = audioStateRef.current
-    const next = idx + 1
-    if (next < sections.length) {
-      setCurrentPartIdx(next)
-      setActiveSection(next)
-    } else {
-      setAudioComplete(true)
-    }
+  function handleEnded() {
+    setAudioComplete(true)
   }
 
   function startAudio() {
@@ -427,6 +675,9 @@ export default function ListeningExam() {
         total: result.total,
         band: result.band,
         perQuestion: result.perQuestion,
+        // Recorded now, while the test content is in hand, so the dashboard can
+        // explain which task types cost marks without re-fetching whole tests.
+        byType: summariseByType(test, result.perQuestion),
       },
     }).eq('id', attemptId)
 
@@ -455,15 +706,15 @@ export default function ListeningExam() {
     document.getElementById(`q${num}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
-  function onRespond(num, val) { setResponses(r => ({ ...r, [num]: val })) }
-
-  function onFlag(num) {
-    setFlagged(prev => {
-      const next = new Set(prev)
-      next.has(num) ? next.delete(num) : next.add(num)
-      return next
-    })
+  function goToQuestion(num, allQs) {
+    const q = allQs.find(x => x.number === num)
+    if (!q) return
+    setActiveQuestion(num)
+    if (q.sectionIndex !== activeSection) setActiveSection(q.sectionIndex)
+    setTimeout(() => scrollToQuestion(num), 80)
   }
+
+  function onRespond(num, val) { setResponses(r => ({ ...r, [num]: val })) }
 
   if (loadError) {
     return (
@@ -504,8 +755,9 @@ export default function ListeningExam() {
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
         onSeeking={handleSeeking}
-        onEnded={handlePartEnded}
+        onEnded={handleEnded}
         onLoadedMetadata={handleLoadedMetadata}
+        onError={() => setAudioError(true)}
         aria-hidden="true"
         tabIndex={-1}
         disableRemotePlayback
@@ -514,58 +766,68 @@ export default function ListeningExam() {
       {/* ── Header ── */}
       <header className="exam-header">
         <div className="exam-header-left">
-          <span className="exam-logo">CDI Practice</span>
-          <span className="exam-test-name">Listening · {test.testLabel ?? 'Test'}</span>
+          <button
+            className="btn btn-ghost exam-back-btn"
+            onClick={() => setShowExitConfirm(true)}
+            aria-label="Back to dashboard"
+          >
+            ← Dashboard
+          </button>
+          <span className="exam-badge">Listening</span>
+          <span className="exam-test-name">{testLabel || 'Test'}</span>
         </div>
         <div
           className={`exam-timer ${urgent ? 'urgent' : warning ? 'warning' : ''}`}
           aria-live="off"
           aria-label={`Time remaining: ${fmtTime(timeLeft ?? 0)}`}
         >
-          ⏱ {fmtTime(timeLeft ?? 0)}
+          <span className="exam-timer-label">Time left</span>
+          <span className="exam-timer-value">{fmtTime(timeLeft ?? 0)}</span>
         </div>
         <div className="exam-header-right">
-          <span className="exam-progress">{answeredCount}/{questions.length} answered</span>
+          <span className="exam-progress num">{answeredCount}/{questions.length} answered</span>
+          <ThemeToggle />
         </div>
       </header>
+      <HighlightBar bar={bar} savedRange={savedRange} onHide={hide} />
+
+      {/* ── Audio ── */}
+      <AudioStatusBar
+        elapsed={audioElapsed}
+        duration={audioDuration}
+        complete={audioComplete}
+        autoplayBlocked={autoplayBlocked}
+        error={audioError}
+        onStart={startAudio}
+      />
 
       {/* ── Part tabs ── */}
-      <nav className="exam-section-tabs" aria-label="Parts">
-        {sections.map((sec, i) => (
-          <button
-            key={sec.id}
-            className={`section-tab ${activeSection === i ? 'active' : ''}`}
-            onClick={() => setActiveSection(i)}
-            aria-current={activeSection === i ? 'page' : undefined}
-          >
-            {sec.title}
-          </button>
-        ))}
-      </nav>
+      <div className="exam-subbar">
+        <nav className="exam-section-tabs" aria-label="Parts">
+          {sections.map((sec, i) => (
+            <button
+              key={sec.id}
+              className={`section-tab ${activeSection === i ? 'active' : ''}`}
+              onClick={() => setActiveSection(i)}
+              aria-current={activeSection === i ? 'page' : undefined}
+            >
+              <span className="section-tab-n num">{i + 1}</span>
+              <span className="section-tab-name">{sec.title}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+      <div className="exam-progress-strip" aria-hidden="true">
+        <div className="exam-progress-strip-fill" style={{ width: `${questions.length ? (answeredCount / questions.length) * 100 : 0}%` }} />
+      </div>
 
-      {/* ── Body ── */}
-      <div className="exam-body">
-        {/* Left: audio info panel */}
-        <div className="exam-audio-col">
-          <AudioPanel
-            sections={sections}
-            currentPartIdx={currentPartIdx}
-            audioElapsed={audioElapsed}
-            audioDuration={audioDuration}
-            audioComplete={audioComplete}
-            autoplayBlocked={autoplayBlocked}
-            onStartAudio={startAudio}
-          />
-        </div>
-
-        {/* Right: questions */}
+      {/* ── Body — questions only; the recording is the audio bar above ── */}
+      <div className="exam-body exam-body--single" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
         <div className="exam-questions-col">
           <QuestionsPanel
             section={currentSection}
             responses={responses}
-            flagged={flagged}
             onRespond={onRespond}
-            onFlag={onFlag}
           />
         </div>
       </div>
@@ -576,17 +838,14 @@ export default function ListeningExam() {
           <nav className="exam-palette" aria-label="Question navigation">
             {questions.map(q => {
               const ans = isAnswered(responses[q.number])
-              const fl  = flagged.has(q.number)
               return (
                 <button
                   key={q.number}
-                  className={`palette-btn ${ans ? 'answered' : ''} ${fl ? 'flagged' : ''}`}
-                  onClick={() => {
-                    if (q.sectionIndex !== activeSection) setActiveSection(q.sectionIndex)
-                    setTimeout(() => scrollToQuestion(q.number), 80)
-                  }}
-                  title={`Question ${q.number}${ans ? ' (answered)' : ''}${fl ? ' (flagged)' : ''}`}
+                  className={`palette-btn ${ans ? 'answered' : ''}${activeQuestion === q.number ? ' active' : ''}`}
+                  onClick={() => goToQuestion(q.number, questions)}
+                  title={`Question ${q.number}${ans ? ' (answered)' : ''}`}
                   aria-label={`Go to question ${q.number}`}
+                  aria-current={activeQuestion === q.number ? 'true' : undefined}
                 >
                   {q.number}
                 </button>
@@ -598,8 +857,25 @@ export default function ListeningExam() {
         <div className="exam-footer-actions">
           <div className="palette-legend">
             <span className="legend-dot answered" /> Answered
-            <span className="legend-dot flagged" /> Flagged
             <span className="legend-dot unanswered" /> Unanswered
+          </div>
+          <div className="exam-nav-btns">
+            <button
+              className="btn btn-outline exam-nav-btn"
+              onClick={() => goToQuestion(activeQuestion - 1, questions)}
+              disabled={activeQuestion <= 1}
+              aria-label="Previous question"
+            >
+              ← Previous
+            </button>
+            <button
+              className="btn btn-outline exam-nav-btn"
+              onClick={() => goToQuestion(activeQuestion + 1, questions)}
+              disabled={activeQuestion >= questions.length}
+              aria-label="Next question"
+            >
+              Next →
+            </button>
           </div>
           <button
             className="btn btn-primary exam-submit-btn"
@@ -610,6 +886,26 @@ export default function ListeningExam() {
           </button>
         </div>
       </footer>
+
+      {/* ── Exit confirmation modal ── */}
+      {showExitConfirm && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="exit-title">
+          <div className="modal-box">
+            <h2 id="exit-title" className="modal-title">Leave the test?</h2>
+            <p className="modal-body">
+              Your progress will be lost. This attempt will not be saved.
+            </p>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setShowExitConfirm(false)} autoFocus>
+                Stay
+              </button>
+              <button className="btn btn-danger" onClick={() => navigate('/dashboard')}>
+                Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Submit confirmation ── */}
       {showConfirm && (

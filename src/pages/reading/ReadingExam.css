@@ -5,8 +5,8 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  background: #f5f7fa;
-  font-family: inherit;
+  background: var(--color-bg);
+  font-family: var(--font);
 }
 
 .exam-loading,
@@ -17,7 +17,7 @@
   justify-content: center;
   height: 100vh;
   gap: 1.5rem;
-  color: #555;
+  color: var(--color-text-muted);
   font-size: 1.1rem;
 }
 
@@ -28,8 +28,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
-  height: 52px;
-  background: var(--color-primary);
+  height: 56px;
+  /* Ink chrome, matching the app shell and landing nav */
+  background: var(--ink);
+  border-bottom: 1px solid var(--ink-rule);
   color: #fff;
   flex-shrink: 0;
   gap: 1rem;
@@ -38,13 +40,44 @@
 .exam-header-left {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   min-width: 0;
+}
+
+.exam-back-btn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius, 6px);
+  padding: 0.3em 0.8em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.exam-back-btn:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.6);
 }
 
 .exam-logo {
   font-weight: 700;
   font-size: 1rem;
+  white-space: nowrap;
+}
+
+.exam-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 4px;
+  padding: 0.2em 0.55em;
   white-space: nowrap;
 }
 
@@ -57,18 +90,34 @@
 }
 
 .exam-timer {
-  font-size: 1.4rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-  padding: 0.2em 0.6em;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: 6px;
-  transition: background 0.3s;
+  padding: 0.3em 0.85em;
+  white-space: nowrap;
+  transition: background 0.3s, border-color 0.3s;
 }
 
-.exam-timer.warning { background: rgba(234,179,8,0.35); }
-.exam-timer.urgent  { background: rgba(239,68,68,0.45); animation: pulse 1s ease infinite; }
+.exam-timer-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+}
+
+.exam-timer-value {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.exam-timer.warning { background: rgba(234,179,8,0.3); border-color: rgba(234,179,8,0.55); }
+.exam-timer.urgent  { background: rgba(239,68,68,0.4); border-color: rgba(239,68,68,0.65); animation: pulse 1s ease infinite; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -76,307 +125,738 @@
 }
 
 .exam-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   white-space: nowrap;
   font-size: 0.85rem;
-  opacity: 0.9;
   text-align: right;
+}
+
+.exam-progress {
+  opacity: 0.9;
 }
 
 /* ── Section tabs ────────────────────────────────────────────── */
 
-.exam-section-tabs {
+/* ── Sub-bar: passage tabs + reading controls ─────────────────
+   A paper tab strip rather than a second coloured band. The active passage is
+   marked with the same gold tick used for the active item in the app nav. */
+
+.exam-subbar {
   display: flex;
-  background: #fff;
-  border-bottom: 2px solid #d0daf0;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
+  padding-right: 1rem;
 }
 
+.exam-section-tabs {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.exam-section-tabs::-webkit-scrollbar { display: none; }
+
 .section-tab {
-  padding: 0.65rem 1.5rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.35rem;
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 0.9rem;
   font-family: inherit;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: #555;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -2px;
-  transition: color 0.15s, border-color 0.15s;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease;
 }
 
-.section-tab:hover,
-.section-tab:focus-visible {
-  color: var(--color-primary);
-  outline: none;
+.section-tab:hover {
+  color: var(--color-text);
+  background: var(--color-card-alt);
 }
 
 .section-tab.active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
   font-weight: 600;
+}
+
+.section-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 1.35rem;
+  right: 1.35rem;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-gold);
+}
+
+.section-tab-n {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.section-tab.active .section-tab-n {
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ── Text size ── */
+
+.exam-textsize {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.exam-textsize-lbl {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-right: 0.15rem;
+}
+
+.textsize-btn {
+  min-width: 2rem;
+  height: 1.85rem;
+  padding: 0 0.4rem;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+}
+
+.textsize-btn:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.textsize-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Thin progress strip directly under the tab row */
+.exam-progress-strip {
+  height: 3px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.exam-progress-strip-fill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
 }
 
 /* ── Body: split screen ──────────────────────────────────────── */
 
+/* `--split` is the passage column width, set inline from the drag handle;
+   `--reading-scale` is the candidate's chosen text size. Both default here so
+   the layout is still correct if the inline styles are ever absent. */
 .exam-body {
   display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
+  --split: 50%;
+  --reading-scale: 1;
 }
 
 .exam-passage-col {
-  flex: 1;
+  flex: 0 0 var(--split);
+  min-width: 0;
   overflow-y: auto;
-  padding: 1.5rem;
-  border-right: 2px solid #d0daf0;
-  background: #fff;
+  padding: 1.75rem 2rem 3rem;
+  background: var(--color-card);
   scrollbar-gutter: stable;
 }
 
 .exam-questions-col {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   overflow-y: auto;
-  padding: 1.5rem;
-  background: #f8f9fb;
+  padding: 1.75rem 2rem 3rem;
+  background: var(--color-bg);
   scrollbar-gutter: stable;
+  position: relative;
 }
+
+/* ── Divider ──────────────────────────────────────────────────
+   A real handle, not a hairline: 9px of hit area with a visible grip. */
+
+.exam-divider {
+  flex: 0 0 9px;
+  position: relative;
+  cursor: col-resize;
+  background: var(--color-border);
+  border: none;
+  padding: 0;
+  touch-action: none;
+  transition: background 0.16s ease;
+}
+
+.exam-divider:hover,
+.exam-divider:focus-visible {
+  background: var(--color-primary);
+  outline: none;
+}
+
+.exam-divider-grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 34px;
+  border-radius: 2px;
+  background: var(--color-card);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.exam-divider:focus-visible .exam-divider-grip { opacity: 1; }
 
 /* ── Passage ─────────────────────────────────────────────────── */
 
-.passage-panel { max-width: 680px; }
+/* The passage is the single thing a candidate stares at for sixty minutes, so
+   it gets a real measure: capped near 68 characters and centred in whatever
+   width the divider leaves it. The body stays in the sans face — the promise
+   of this product is the real exam, and the real computer-delivered test sets
+   passages in a sans. */
+.passage-panel {
+  max-width: calc(38rem * var(--reading-scale, 1));
+  margin-inline: auto;
+  font-size: calc(1rem * var(--reading-scale, 1));
+}
 
 .passage-section-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: 1.5em;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.018em;
+  color: var(--color-text);
+  margin: 0 0 1.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--color-border);
+  text-wrap: balance;
+}
+
+.passage-heading {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.35rem;
+}
+
+.passage-subheading {
+  font-size: 0.92em;
+  font-style: italic;
+  color: var(--color-text-muted);
   margin: 0 0 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #d0daf0;
 }
 
 .passage-paragraph {
   display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 1rem;
+  margin-bottom: 1.15em;
   line-height: 1.75;
-  font-size: 0.975rem;
-  color: #222;
+  font-size: 1em;
+  color: var(--color-text);
 }
 
+/* Paragraph letter, hung in the margin so it never interrupts the measure */
 .para-ref {
-  flex-shrink: 0;
-  font-weight: 700;
-  color: var(--color-primary);
-  font-size: 0.85rem;
-  width: 1.4rem;
-  padding-top: 0.1em;
+  flex: 0 0 1.5rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.8em;
+  color: var(--color-text-faint);
+  padding-top: 0.28em;
+  text-align: right;
+  user-select: none;
 }
 
-.para-text { flex: 1; }
+.para-text { flex: 1; min-width: 0; }
 
-/* ── Question groups ─────────────────────────────────────────── */
+/* Questions panel tracks the same reading scale */
+.questions-panel { font-size: calc(1rem * var(--reading-scale, 1)); }
+
+/* ── Question groups (one card per group) ────────────────────── */
 
 .question-group {
-  margin-bottom: 2rem;
-}
-
-.group-instructions {
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
-  border-radius: 8px;
-  padding: 1rem 1.1rem;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.4rem;
   margin-bottom: 1.25rem;
-  font-size: 0.9rem;
-  color: #333;
-  line-height: 1.6;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
 }
 
-.group-inst-text { margin: 0.5rem 0 0; }
+.q-section-range {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-primary);
+  margin-bottom: 0.3rem;
+}
 
-.matching-options-box {
-  background: #fff;
-  border: 1px solid #c7d2fe;
-  border-radius: 6px;
-  padding: 0.75rem 1rem;
+.group-inst-text {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  font-style: italic;
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.group-shared-prompt {
   margin-bottom: 0.75rem;
 }
 
+/* ── Matching options box ─────────────────────────────────────── */
+
+.matching-options-box {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+
 .matching-options-label {
-  font-weight: 600;
-  font-size: 0.85rem;
-  color: #555;
-  margin: 0 0 0.5rem;
+  font-weight: 700;
+  font-size: 0.76rem;
+  color: var(--color-text);
+  margin: 0 0 0.45rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  text-align: center;
 }
 
 .matching-options-list {
   margin: 0;
-  padding: 0 0 0 1.2rem;
-  font-size: 0.9rem;
+  padding: 0 0 0 1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
-  color: #333;
+  color: var(--color-text);
   list-style: none;
 }
 
 .matching-option-item {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
 }
 
-/* ── Question items ──────────────────────────────────────────── */
-
-.question-item {
-  background: #fff;
-  border: 1px solid #e4ecff;
-  border-radius: 10px;
-  padding: 1rem 1.1rem;
-  margin-bottom: 1rem;
-  scroll-margin-top: 1rem;
-  transition: border-color 0.15s;
+/* Word-bank grid: 3 columns, compact pills */
+.matching-options-list.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem 0.6rem;
+  padding: 0;
 }
 
-.question-item:focus-within {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(26,86,164,0.12);
+.matching-options-list.options-grid .matching-option-item {
+  margin-bottom: 0;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  padding: 0.3em 0.55em;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  white-space: normal;
+  word-break: break-word;
 }
 
-.q-header {
+/* ── Summary passage completion ──────────────────────────────── */
+
+.summary-passage {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.summary-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 2.2;
+  color: var(--color-text);
+}
+
+.summary-blank-wrap {
+  display: inline;
+  white-space: nowrap;
+}
+
+.summary-q-num {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  vertical-align: super;
+  margin-right: 0.1em;
+}
+
+.summary-blank {
+  width: 7rem;
+  margin: 0 0.15em;
+}
+
+.summary-word-bank {
+  margin-bottom: 0.8rem;
+}
+
+.summary-gap-select {
+  font-size: 0.85rem;
+  padding: 0.15em 0.3em;
+  margin: 0 0.2em;
+  vertical-align: baseline;
+}
+
+/* ── Inline note-box for completion questions ────────────────── */
+
+.note-box {
+  background: var(--color-bg);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+}
+
+.note-box-title {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;
+  margin: 0 0 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.note-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.6rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+  font-size: 1.05rem;
+  line-height: 1.8;
 }
 
-.q-number {
+.note-row-main {
+  flex: 1;
+  display: inline;
+  line-height: 1.75;
+}
+
+.note-bullet {
+  color: var(--color-primary);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+}
+
+.note-q-num {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  display: inline;
+}
+
+.blank-input {
+  border: none;
+  border-bottom: 2px solid var(--color-primary);
+  background: transparent;
+  font-family: inherit;
+  font-size: 0.88em;
+  width: 110px;
+  padding: 0 3px 1px;
+  outline: none;
+  color: var(--color-text);
+  transition: border-color 0.2s;
+  vertical-align: baseline;
+  display: inline;
+}
+
+.blank-input:focus {
+  border-bottom-color: var(--color-primary-dark);
+}
+
+.note-row .flag-btn {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.note-header {
+  font-weight: 700;
+  font-size: 0.93rem;
+  color: var(--color-text);
+  padding: 0.55rem 0 0.1rem;
+  margin-top: 0.2rem;
+}
+
+.note-subheader {
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  padding-bottom: 0.15rem;
+}
+
+.note-row--sub {
+  padding-left: 1.5rem;
+}
+
+/* ── Question rows ─────────────────────────────────────────────
+   Shared [q-num][body][flag] layout used by TFNG, MCQ, and text
+   questions. Matching uses the leaner inline .match-row instead. */
+
+.question-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--color-border);
+  scroll-margin-top: 0.5rem;
+}
+
+.question-row:first-of-type { padding-top: 0; }
+
+.question-row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.question-row-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.q-num {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.6rem;
+  height: 1.6rem;
   border-radius: 50%;
   background: var(--color-primary);
   color: #fff;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   flex-shrink: 0;
 }
 
 .flag-btn {
-  font-size: 0.8rem;
-  padding: 0.25em 0.6em;
-  border: 1px solid #d0d5e0;
-  border-radius: 4px;
-  background: #f5f5f5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-flag-bg);
   cursor: pointer;
-  color: #555;
-  font-family: inherit;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .flag-btn:hover, .flag-btn:focus-visible {
-  background: #fff3cd;
-  border-color: #d97706;
-  color: #92400e;
+  background: var(--color-flag-hover-bg);
+  border-color: var(--color-flag-hover-border);
+  color: var(--color-flag-hover-text);
   outline: none;
 }
 
 .flag-btn.flagged {
-  background: #fff3cd;
-  border-color: #d97706;
-  color: #92400e;
+  background: var(--color-flag-hover-bg);
+  border-color: var(--color-flag-hover-border);
+  color: var(--color-flag-hover-text);
 }
 
 .q-prompt {
-  font-size: 0.95rem;
-  color: #222;
-  line-height: 1.55;
-  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0 0 0.6rem;
 }
 
 .q-hint {
-  font-size: 0.8rem;
-  color: #666;
-  margin: -0.25rem 0 0.6rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: -0.2rem 0 0.55rem;
   font-style: italic;
 }
 
-/* ── Choice buttons (T/F/NG, Y/N/NG) ────────────────────────── */
+/* ── Inline blank prompt (short_answer with _______ in prompt) ── */
 
-.choice-buttons {
+.q-inline-prompt {
+  display: inline;
+  line-height: 2;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+/* ── Paragraph / section letter-select buttons ───────────────── */
+
+.letter-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.letter-btn {
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-card);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.letter-btn:hover,
+.letter-btn:focus-visible {
+  border-color: var(--color-primary);
+  background: var(--color-accent);
+  outline: none;
+}
+
+.letter-btn.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
+}
+
+/* ── T/F/NG, Y/N/NG three-button groups ───────────────────────── */
+
+.tfng-btns {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.choice-btn {
-  padding: 0.45em 1em;
-  border: 2px solid #d0daf0;
+.tfng-btn {
+  min-width: 4.5rem;
+  padding: 0.4em 1em;
+  border: 1.5px solid var(--color-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-card);
   cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 500;
+  font-size: 0.84rem;
+  font-weight: 600;
   font-family: inherit;
-  color: #333;
+  color: var(--color-text);
   transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
-.choice-btn:hover, .choice-btn:focus-visible {
+.tfng-btn:hover, .tfng-btn:focus-visible {
   border-color: var(--color-primary);
-  background: #eef2ff;
+  background: var(--color-accent);
   outline: none;
 }
 
-.choice-btn.selected {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
+.tfng-btn.selected.sel-t {
+  background: var(--color-sel-t-bg);
+  border-color: var(--color-sel-t);
+  color: var(--color-sel-t);
 }
 
-/* ── Radio options ───────────────────────────────────────────── */
+.tfng-btn.selected.sel-f {
+  background: var(--color-sel-f-bg);
+  border-color: var(--color-sel-f);
+  color: var(--color-sel-f);
+}
 
-.radio-options, .checkbox-options {
+.tfng-btn.selected.sel-n {
+  background: var(--color-sel-n-bg);
+  border-color: var(--color-sel-n);
+  color: var(--color-sel-n);
+}
+
+/* ── Multiple-choice option rows ──────────────────────────────── */
+
+.mc-opts {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.4rem;
 }
 
-.radio-option, .checkbox-option {
+.mc-opt {
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
-  padding: 0.5em 0.75em;
-  border: 1.5px solid #d0daf0;
+  padding: 0.45em 0.7em;
+  border: 1.5px solid var(--color-border);
   border-radius: 7px;
   cursor: pointer;
-  background: #fff;
-  font-size: 0.9rem;
-  color: #333;
+  background: var(--color-card);
+  font-size: 1rem;
+  color: var(--color-text);
   transition: background 0.12s, border-color 0.12s;
   line-height: 1.4;
 }
 
-.radio-option:hover, .checkbox-option:hover,
-.radio-option:focus-within, .checkbox-option:focus-within {
+.mc-opt:hover, .mc-opt:focus-within {
   border-color: var(--color-primary);
-  background: #eef2ff;
+  background: var(--color-accent);
 }
 
-.radio-option.selected, .checkbox-option.selected {
+.mc-opt.selected {
   border-color: var(--color-primary);
-  background: #eef2ff;
+  background: var(--color-accent);
 }
 
-.radio-option.disabled, .checkbox-option.disabled {
+.mc-opt.disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.radio-option input, .checkbox-option input {
-  margin-top: 0.1em;
+.mc-opt input {
+  margin-top: 0.15em;
   accent-color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.opt-letter {
+  font-weight: 700;
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -386,22 +866,86 @@
   flex-shrink: 0;
 }
 
-/* ── Matching ────────────────────────────────────────────────── */
+/* ── Matching: inline label + compact select ──────────────────── */
 
-.matching-select {
-  width: 100%;
-  padding: 0.5em 0.75em;
-  border: 1.5px solid #d0daf0;
-  border-radius: 7px;
-  font-size: 0.9rem;
-  font-family: inherit;
-  background: #fff;
-  cursor: pointer;
-  color: #333;
-  appearance: auto;
+.match-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--color-border);
+  scroll-margin-top: 0.5rem;
+  font-size: 1rem;
 }
 
-.matching-select:focus {
+.match-row:first-of-type { padding-top: 0; }
+
+.match-row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.match-label {
+  flex: 1;
+  min-width: 0;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.match-select {
+  flex-shrink: 0;
+  width: 3.6rem;
+  padding: 0.3em 0.4em;
+  border: 1.5px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 600;
+  background: var(--color-card);
+  cursor: pointer;
+  color: var(--color-text);
+  text-align: center;
+  text-align-last: center;
+}
+
+.match-select:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+  border-color: var(--color-primary);
+}
+
+/* ── Inline-gap matching (word bank with _______ in sentence) ── */
+
+.match-row-inline {
+  align-items: baseline;
+}
+
+.match-inline-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  line-height: 2;
+  color: var(--color-text);
+}
+
+.match-gap-select {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0.25em;
+  padding: 0.15em 1.6em 0.15em 0.5em;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 5px;
+  background: var(--color-card);
+  cursor: pointer;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 600;
+  appearance: auto;
+  min-width: 3.2rem;
+}
+
+.match-gap-select:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 1px;
 }
@@ -410,12 +954,14 @@
 
 .text-answer {
   width: 100%;
-  padding: 0.5em 0.75em;
-  border: 1.5px solid #d0daf0;
+  padding: 0.45em 0.7em;
+  border: 1.5px solid var(--color-border);
   border-radius: 7px;
-  font-size: 0.9rem;
+  font-size: 0.97rem;
   font-family: inherit;
   box-sizing: border-box;
+  background: var(--color-card);
+  color: var(--color-text);
 }
 
 .text-answer:focus {
@@ -427,8 +973,8 @@
 /* ── Footer ──────────────────────────────────────────────────── */
 
 .exam-footer {
-  background: #fff;
-  border-top: 2px solid #d0daf0;
+  background: var(--ink);
+  border-top: 1px solid var(--ink-rule);
   padding: 0.6rem 1rem;
   flex-shrink: 0;
 }
@@ -450,37 +996,44 @@
   width: 2rem;
   height: 2rem;
   border-radius: 5px;
-  border: 1.5px solid #ccc;
-  background: #f3f4f6;
+  border: 1px solid rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.06);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  color: #444;
-  font-family: inherit;
+  color: rgba(255,255,255,0.85);
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
 
 .palette-btn:hover, .palette-btn:focus-visible {
-  border-color: var(--color-primary);
+  border-color: #fff;
   outline: none;
 }
 
 .palette-btn.answered {
-  background: #d1fae5;
-  border-color: #059669;
-  color: #065f46;
+  background: var(--color-pal-answered);
+  border-color: var(--color-pal-answered);
+  color: #fff;
 }
 
 .palette-btn.flagged {
-  background: #fef3c7;
-  border-color: #d97706;
-  color: #92400e;
+  background: var(--color-pal-flagged);
+  border-color: var(--color-pal-flagged);
+  color: #fff;
 }
 
 .palette-btn.answered.flagged {
-  background: #fef3c7;
-  border-color: #d97706;
-  color: #92400e;
+  background: var(--color-pal-flagged);
+  border-color: var(--color-pal-flagged);
+  color: #fff;
+}
+
+.palette-btn.active {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+  z-index: 1;
 }
 
 .exam-footer-actions {
@@ -491,12 +1044,38 @@
   gap: 0.5rem;
 }
 
+.exam-nav-btns {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.exam-nav-btn {
+  font-size: 0.82rem;
+  padding: 0.4em 0.9em;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.9);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  font-weight: 600;
+  border-radius: 5px;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.exam-nav-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.2);
+  border-color: rgba(255,255,255,0.7);
+}
+
+.exam-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .palette-legend {
   display: flex;
   align-items: center;
   gap: 1rem;
-  font-size: 0.78rem;
-  color: #555;
+  font-size: 0.76rem;
+  color: rgba(255,255,255,0.8);
   flex-wrap: wrap;
 }
 
@@ -505,18 +1084,35 @@
   width: 0.8rem;
   height: 0.8rem;
   border-radius: 3px;
-  border: 1.5px solid #ccc;
+  border: 1.5px solid rgba(255,255,255,0.3);
   margin-right: 0.25rem;
   vertical-align: middle;
 }
 
-.legend-dot.answered  { background: #d1fae5; border-color: #059669; }
-.legend-dot.flagged   { background: #fef3c7; border-color: #d97706; }
-.legend-dot.unanswered{ background: #f3f4f6; border-color: #ccc; }
+.legend-dot.answered  { background: var(--color-pal-answered); border-color: var(--color-pal-answered); }
+.legend-dot.flagged   { background: var(--color-pal-flagged); border-color: var(--color-pal-flagged); }
+.legend-dot.unanswered{ background: transparent; border-color: rgba(255,255,255,0.45); }
 
+/* The footer sits on ink in both themes, so the submit button pairs white with
+   ink text. Using --color-primary here would fail contrast in dark mode, where
+   the primary lightens. */
 .exam-submit-btn {
-  font-size: 0.95rem;
-  padding: 0.55em 1.5em;
+  font-size: 0.92rem;
+  padding: 0.55em 1.6em;
+  background: #fff;
+  color: var(--ink);
+  border: none;
+  font-weight: 700;
+}
+
+.exam-submit-btn:hover:not(:disabled) {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.6);
+}
+
+.exam-submit-btn:hover:not(:disabled) {
+  background: var(--color-accent);
 }
 
 /* ── Confirmation modal ──────────────────────────────────────── */
@@ -533,7 +1129,7 @@
 }
 
 .modal-box {
-  background: #fff;
+  background: var(--color-card);
   border-radius: 12px;
   padding: 2rem;
   max-width: 440px;
@@ -545,11 +1141,11 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0 0 0.75rem;
-  color: #111;
+  color: var(--color-text);
 }
 
 .modal-body {
-  color: #444;
+  color: var(--color-text-muted);
   line-height: 1.6;
   margin: 0 0 1.5rem;
   font-size: 0.95rem;
@@ -564,6 +1160,9 @@
 /* ── Mobile: stack passage above questions ───────────────────── */
 
 @media (max-width: 768px) {
+  /* Stacked: the passage reads above the questions and the split ratio no
+     longer applies, so the drag handle is withdrawn rather than left as a
+     control that does nothing. */
   .exam-body {
     flex-direction: column;
     overflow: auto;
@@ -573,18 +1172,80 @@
     flex: none;
     overflow: visible;
     border-right: none;
-    border-bottom: 2px solid #d0daf0;
-    padding: 1rem;
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.25rem 1.15rem 1.75rem;
   }
 
   .exam-questions-col {
     flex: none;
     overflow: visible;
-    padding: 1rem;
+    padding: 1.25rem 1.15rem 2rem;
   }
+
+  .exam-divider { display: none; }
 
   .exam-header-right { display: none; }
   .exam-test-name { display: none; }
 
+  .exam-subbar { flex-direction: column; align-items: stretch; padding-right: 0; }
+  .exam-textsize {
+    justify-content: flex-end;
+    padding: 0.4rem 0.9rem 0.6rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .section-tab { padding: 0.7rem 0.9rem; }
+  .section-tab.active::after { left: 0.9rem; right: 0.9rem; }
+
   .exam-palette { flex-wrap: nowrap; }
+}
+
+/* ── Exam notes / scratch pad (shared across all writing exams) ── */
+
+.exam-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin-top: 0.5rem;
+}
+
+.exam-notes-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-faint);
+  user-select: none;
+}
+
+.exam-notes-area {
+  width: 100%;
+  min-height: 110px;
+  resize: vertical;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.88rem;
+  font-family: var(--font);
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-card-3);
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.exam-notes-area::placeholder {
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.exam-notes-area:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.exam-notes-area:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -1,0 +1,353 @@
+/* ── Writing Task 1 layout overrides ─────────────────────────── */
+
+.wt1-layout {
+  /* Inherits .exam-layout (flex column, 100vh) from ReadingExam.css */
+}
+
+.wt1-body {
+  /* Override the default two-column split */
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Timer (count-up, styled differently from countdown) ─────── */
+
+.wt1-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  padding: 0.3em 0.85em;
+  white-space: nowrap;
+}
+
+.wt1-timer-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+  color: #fff;
+}
+
+.wt1-timer-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+/* ── Chart column (left, 45%) ─────────────────────────────────── */
+
+.wt1-chart-col {
+  width: 45%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 2px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.wt1-chart-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wt1-chart-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.wt1-chart-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-faint);
+}
+
+.wt1-fullscreen-btn {
+  background: none;
+  border: 1px solid var(--color-border-blue);
+  border-radius: 5px;
+  font-size: 0.78rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0.2em 0.6em;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+
+.wt1-fullscreen-btn:hover { background: var(--color-accent); }
+
+/* ── Annotation toolbar ───────────────────────────────────────── */
+
+.ann-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--color-card-3);
+  border: 1px solid var(--color-border-blue);
+  border-radius: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ann-btn {
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 5px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  padding: 0.25em 0.7em;
+  cursor: pointer;
+  color: var(--color-text-medium);
+  transition: background 0.1s, border-color 0.1s;
+  white-space: nowrap;
+}
+
+.ann-btn:hover { background: var(--color-accent); border-color: var(--color-primary); }
+
+.ann-btn-active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.ann-btn-active:hover {
+  background: var(--color-primary-dark);
+  color: #fff;
+}
+
+.ann-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.ann-color-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--swatch, #ccc);
+  cursor: pointer;
+  transition: border-color 0.1s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.ann-color-btn:hover { transform: scale(1.15); }
+.ann-color-btn.ann-color-active { border-color: var(--color-text-dark); }
+
+/* ── Chart image + canvas ─────────────────────────────────────── */
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.chart-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.annotation-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.wt1-no-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  border: 2px dashed var(--color-border-blue);
+  border-radius: 8px;
+  color: var(--color-text-faint);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* ── Fullscreen chart overlay ─────────────────────────────────── */
+
+.chart-fullscreen-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 2000;
+  cursor: zoom-out;
+}
+
+.chart-fullscreen-img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  cursor: default;
+  object-fit: contain;
+}
+
+.chart-fullscreen-close {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.5rem;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.chart-fullscreen-close:hover { background: rgba(255,255,255,0.28); }
+
+/* ── Editor column (right, 55%) ───────────────────────────────── */
+
+.wt1-editor-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.wt1-prompt-box {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
+  flex-shrink: 0;
+}
+
+.wt1-prompt-text {
+  font-size: 0.97rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0;
+  font-style: italic;
+}
+
+.wt1-textarea {
+  flex: 1;
+  width: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.05rem;
+  font-family: var(--font);
+  line-height: 1.8;
+  color: var(--color-text);
+  background: var(--color-bg);
+  box-sizing: border-box;
+}
+
+.wt1-textarea::placeholder {
+  color: var(--color-text-faint);
+}
+
+/* ── Word count bar ───────────────────────────────────────────── */
+
+.wt1-wordcount-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-card);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.wt1-wordcount-num {
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.wc-low  { color: var(--color-sel-f); }
+.wc-warn { color: var(--color-band-mid); }
+.wc-good { color: var(--color-band-high); }
+
+.wt1-wordcount-min {
+  font-size: 0.82rem;
+  color: var(--color-text-faint);
+}
+
+.wt1-wordcount-ok {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-band-high);
+}
+
+/* ── Confirm modal extra ──────────────────────────────────────── */
+
+.wt1-warn-words {
+  color: var(--color-sel-f);
+  font-weight: 600;
+}
+
+/* ── Mobile ───────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .wt1-body {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .wt1-chart-col {
+    width: 100%;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 2px solid var(--color-border);
+    flex-shrink: 0;
+    max-height: 55vh;
+  }
+
+  .wt1-editor-col {
+    flex: none;
+    min-height: 300px;
+  }
+
+  .wt1-textarea {
+    flex: none;
+    min-height: 200px;
+  }
+}

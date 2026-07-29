@@ -1,0 +1,216 @@
+.wr-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.wr-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  color: var(--color-text-faint);
+}
+
+.wr-error {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  margin: 0 0 1rem;
+}
+
+/* ── Summary card ─────────────────────────────────────────────── */
+
+.wr-summary-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-blue);
+  border-radius: 14px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.wr-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.3rem;
+}
+
+.wr-prompt-title {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1.5rem;
+}
+
+.wr-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 1.75rem;
+}
+
+.wr-stat-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.wr-stat-value {
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-primary);
+}
+
+.wr-stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-faint);
+}
+
+.wr-stat-note {
+  font-size: 0.75rem;
+  color: var(--color-sel-f);
+}
+
+.wr-wc-good { color: var(--color-band-high); }
+.wr-wc-warn { color: var(--color-band-mid); }
+.wr-wc-low  { color: var(--color-sel-f); }
+
+.wr-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── Section heading ──────────────────────────────────────────── */
+
+.wr-section-heading {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-medium);
+  margin: 0 0 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Prompt card ──────────────────────────────────────────────── */
+
+.wr-prompt-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-blue);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.wr-prompt-text {
+  font-size: 0.97rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  font-style: italic;
+  margin: 0 0 1.25rem;
+}
+
+.wr-chart-container {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+}
+
+.wr-chart-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wr-chart-annotations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ── Essay card ───────────────────────────────────────────────── */
+
+.wr-essay-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-blue);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.wr-essay-body {
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: var(--color-text);
+  border-left: 3px solid var(--color-border-blue);
+  padding-left: 1.1rem;
+  margin-bottom: 1.25rem;
+}
+
+.wr-essay-body p {
+  margin: 0 0 0.75rem;
+}
+
+.wr-essay-body p:last-child {
+  margin-bottom: 0;
+}
+
+.wr-empty-essay {
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.wr-essay-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.wr-wc-chip {
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.2em 0.7em;
+  border-radius: 20px;
+}
+
+.wr-wc-chip.wr-wc-good {
+  background: var(--color-badge-correct-bg);
+  color: var(--color-badge-correct);
+}
+
+.wr-wc-chip.wr-wc-warn {
+  background: var(--color-draft-bg);
+  color: var(--color-draft);
+}
+
+.wr-wc-chip.wr-wc-low {
+  background: var(--color-badge-wrong-bg);
+  color: var(--color-badge-wrong);
+}
+
+.wr-wc-ok {
+  font-size: 0.85rem;
+  color: var(--color-band-high);
+  font-weight: 600;
+}
+
+.wr-wc-short {
+  font-size: 0.85rem;
+  color: var(--color-sel-f);
+}

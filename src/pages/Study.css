@@ -1,0 +1,313 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   COACH / STUDY — "are you on track?" answered by the band-rule instrument
+   carrying three points, then one clear thing to do next. Extends the
+   Calibrated system; no new visual language.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.study {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.study > * { min-width: 0; }
+
+/* ── Head ── */
+
+.study-kicker {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin: 0 0 0.7rem;
+}
+
+.study-title {
+  font-family: var(--font-display);
+  font-size: var(--t-3xl);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: var(--color-text);
+  margin: 0 0 0.6rem;
+  text-wrap: balance;
+}
+
+.study-verdict {
+  font-size: var(--t-md);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  max-width: 60ch;
+  margin: 0;
+}
+
+/* ── Readiness gauge ── */
+
+.study-gauge {
+  padding: 2rem 1.85rem 1.6rem;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.study-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+}
+
+.study-leg {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: var(--t-sm);
+  color: var(--color-text-muted);
+}
+
+.study-leg b { color: var(--color-text); font-weight: 600; }
+
+.study-leg-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.study-leg-dot--now  { background: var(--color-primary); }
+.study-leg-dot--pred {
+  background: var(--color-card);
+  border: 2px solid var(--color-primary);
+}
+
+.study-leg-dash {
+  width: 16px;
+  height: 0;
+  border-top: 2px dashed var(--color-gold);
+  flex-shrink: 0;
+}
+
+.study-target-edit {
+  margin-left: auto;
+  padding: 0;
+  font-size: var(--t-xs);
+  color: var(--color-text-faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.study-target-edit:hover { color: var(--color-text); }
+.study-target-edit:empty { display: none; }
+
+/* ── Target picker ── */
+
+.study-target-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+}
+
+.study-picker-label {
+  font-size: var(--t-sm);
+  color: var(--color-text-muted);
+  margin-right: 0.35rem;
+}
+
+.study-target-opt {
+  padding: 0.4rem 0.8rem;
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.study-target-opt:hover { border-color: var(--color-gold); color: var(--color-gold); }
+
+/* ── Panels ── */
+
+.study-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+}
+
+.study-panel {
+  padding: 1.5rem 1.6rem 1.7rem;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+
+.study-panel-kicker {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem;
+}
+
+/* Focus panel — gold-marked, it's the one recommendation. Flex column so the
+   CTA sits at the bottom edge and the card fills its (equal) height by design
+   rather than leaving a gap. */
+.study-focus {
+  box-shadow: inset 0 2px 0 var(--color-gold);
+  display: flex;
+  flex-direction: column;
+}
+
+.study-focus .btn { margin-top: auto; }
+
+.study-focus-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: var(--font-display);
+  font-size: var(--t-xl);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--color-text);
+  margin: 0 0 0.6rem;
+}
+
+.study-focus-acc {
+  flex-shrink: 0;
+  font-size: var(--t-md);
+  font-weight: 600;
+  color: var(--color-band-low);
+}
+
+.study-focus-note {
+  font-size: var(--t-sm);
+  line-height: 1.65;
+  color: var(--color-text-muted);
+  margin: 0 0 1.35rem;
+}
+
+.study-focus .btn { align-self: flex-start; }
+
+/* ── Section heading ── */
+
+.study-section-h {
+  font-family: var(--font-display);
+  font-size: var(--t-lg);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--color-text);
+  margin: 0 0 1rem;
+}
+
+/* ── Results list (clickable) ── */
+
+.study-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.study-result {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0.75rem;
+  margin-inline: -0.75rem;
+  border-bottom: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.14s ease;
+}
+
+.study-result:hover { background: var(--color-card); text-decoration: none; color: inherit; }
+
+.study-skill {
+  flex-shrink: 0;
+  min-width: 84px;
+  padding: 0.22rem 0.55rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  border-radius: 4px;
+}
+
+.study-skill--reading   { background: var(--color-skill-reading-bg);   color: var(--color-skill-reading); }
+.study-skill--listening { background: var(--color-skill-listening-bg); color: var(--color-skill-listening); }
+
+.study-band {
+  font-size: var(--t-sm);
+  font-weight: 500;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+}
+
+.study-raw { font-size: var(--t-sm); color: var(--color-text-muted); }
+
+.study-date {
+  margin-left: auto;
+  font-size: var(--t-sm);
+  color: var(--color-text-faint);
+  white-space: nowrap;
+}
+
+.study-arrow { flex-shrink: 0; color: var(--color-text-faint); transition: transform 0.14s ease, color 0.14s ease; }
+.study-result:hover .study-arrow { color: var(--color-primary); transform: translateX(2px); }
+
+/* ── Empty state ── */
+
+.study-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 2.5rem 2rem;
+  background: var(--color-card);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
+.study-empty-head {
+  font-family: var(--font-display);
+  font-size: var(--t-lg);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.study-empty-body {
+  font-size: var(--t-sm);
+  line-height: 1.65;
+  color: var(--color-text-muted);
+  max-width: 56ch;
+  margin: 0;
+}
+
+.study-empty .btn { margin-top: 0.75rem; }
+.study-empty .study-target-picker { margin-top: 0.5rem; }
+
+/* ── Responsive ── */
+
+@media (max-width: 900px) {
+  .study-panels { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .study-title { font-size: var(--t-2xl); }
+  .study-gauge { padding: 1.5rem 1.15rem 1.25rem; }
+  .study-result { flex-wrap: wrap; gap: 0.5rem 0.75rem; }
+  .study-date { margin-left: 0; width: 100%; order: 5; }
+}
