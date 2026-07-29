@@ -5,17 +5,294 @@
 }
 
 :root {
-  --color-primary: #1a56a4;
-  --color-primary-dark: #144191;
-  --color-accent: #e8f0fe;
-  --color-text: #1a1a2e;
-  --color-text-muted: #5a5a72;
-  --color-bg: #f8f9fc;
+  /* ═══ TYPE ═══
+     Newsreader carries voice (marketing headlines, brand).
+     IBM Plex Sans is the instrument face — UI, exam chrome, body.
+     IBM Plex Mono is reserved for measured values: bands, timers, counts. */
+  --font: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Type scale (1.25 major third, 16px base) */
+  --t-xs:   0.75rem;
+  --t-sm:   0.875rem;
+  --t-base: 1rem;
+  --t-md:   1.125rem;
+  --t-lg:   1.375rem;
+  --t-xl:   1.75rem;
+  --t-2xl:  2.25rem;
+  --t-3xl:  3rem;
+  --t-4xl:  4rem;
+
+  /* ── Core palette ── */
+  --color-primary: #1E4FA1;
+  --color-primary-dark: #17407F;
+  /* Foreground that sits on --color-primary. Flips in dark mode, where the
+     primary lightens and white text would fall below contrast. */
+  --color-on-primary: #ffffff;
+  --color-accent: #E7EFFB;
+  --color-text: #101B2D;
+  --color-text-muted: #566276;
+  --color-bg: #F2F5F9;
   --color-white: #ffffff;
-  --color-border: #d1d5db;
-  --radius: 8px;
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
-  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --color-border: #D3DBE6;
+
+  /* ── Ink: the deep ground used by hero / auth / footer ── */
+  --ink:    #0A1424;
+  --ink-2:  #111F35;
+  --ink-3:  #1B2C46;
+  --ink-rule: rgba(255, 255, 255, 0.10);
+  --ink-text: rgba(255, 255, 255, 0.94);
+  --ink-text-dim: rgba(255, 255, 255, 0.60);
+
+  /* Hairline rule — the tick colour of the band scale */
+  --rule: #C9D3E0;
+
+  /* ── Chart series ──
+     Categorical, assigned by entity (never by rank) so a filter that changes
+     the series count never repaints the survivors. Validated with the dataviz
+     palette checker against the light chart surface: lightness band, chroma
+     floor, CVD separation, normal-vision floor and contrast all pass. Adjacent
+     tritan separation sits in the 6–8 floor band, which is legal here because
+     identity is also carried by the legend and direct end-labels. */
+  --chart-reading: #2563EB;
+  --chart-listening: #059669;
+  --chart-grid: #E4EAF2;
+  --chart-axis: #8894A6;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 27, 45, 0.06);
+  --shadow: 0 2px 12px rgba(16, 27, 45, 0.08);
+  --shadow-lg: 0 18px 48px -12px rgba(10, 20, 36, 0.28);
+
+  /* ── Gold accent (achievement) ── */
+  --color-gold: #C4870B;
+  --color-gold-light: #FEF3C7;
+
+  /* ── Card / surface roles ── */
+  --color-card: #ffffff;
+  --color-card-alt: #F4F7FD;
+  --color-card-3: #E8EEFF;
+  --color-review-bg: #F2F5FB;
+
+  /* ── Extended text shades ── */
+  --color-text-dark: #111111;
+  --color-text-medium: #333333;
+  --color-text-dim: #555555;
+  --color-text-faint: #666666;
+
+  /* ── Decorative / table borders ── */
+  --color-border-blue: #d0daf0;
+  --color-border-table: #e8edf5;
+
+  /* ── Flag button ── */
+  --color-flag-bg: #ffffff;
+  --color-flag-hover-bg: #fff3cd;
+  --color-flag-hover-border: #d97706;
+  --color-flag-hover-text: #92400e;
+
+  /* ── T/F/NG answer states ── */
+  --color-sel-t-bg: #f0fdf4;
+  --color-sel-t: #16a34a;
+  --color-sel-f-bg: #fef2f2;
+  --color-sel-f: #dc2626;
+  --color-sel-n-bg: #f5f3ff;
+  --color-sel-n: #7c3aed;
+
+  /* ── Question navigator palette ── */
+  --color-pal-answered: #16a34a;
+  --color-pal-flagged: #d97706;
+
+  /* ── Band score cards ── */
+  --color-band-default-bg: #f0f5ff;
+  --color-band-high-bg: #d1fae5;
+  --color-band-high: #059669;
+  --color-band-mid-bg: #fef3c7;
+  --color-band-mid: #d97706;
+  --color-band-low-bg: #fee2e2;
+  --color-band-low: #dc2626;
+
+  /* ── Evidence highlights ── */
+  --color-ev-correct: #bbf7d0;
+  --color-ev-wrong: #fecaca;
+  --color-ev-mixed: #fef9c3;
+
+  /* ── Skill tags ── */
+  --color-skill-reading-bg: #dbeafe;
+  --color-skill-reading: #1e40af;
+  --color-skill-listening-bg: #d1fae5;
+  --color-skill-listening: #065f46;
+  --color-skill-writing-bg: #fef3c7;
+  --color-skill-writing: #92400e;
+
+  /* ── Status badges (correct / wrong) ── */
+  --color-badge-correct-bg: #d1fae5;
+  --color-badge-correct: #065f46;
+  --color-badge-correct-border: #6ee7b7;
+  --color-badge-wrong-bg: #fee2e2;
+  --color-badge-wrong: #991b1b;
+  --color-badge-wrong-border: #fca5a5;
+
+  /* ── Inline alert banners ── */
+  --color-alert-error-bg: #fee2e2;
+  --color-alert-error: #991b1b;
+  --color-alert-success-bg: #d1fae5;
+  --color-alert-success: #065f46;
+
+  /* ── Audio state badges ── */
+  --color-audio-playing-bg: #dbeafe;
+  --color-audio-playing: #1e40af;
+  --color-audio-playing-border: #bfdbfe;
+  --color-audio-done-bg: #dcfce7;
+  --color-audio-done: #166534;
+  --color-audio-done-border: #bbf7d0;
+
+  /* ── Tips box ── */
+  --color-tips-bg: #f0f7ee;
+  --color-tips-border: #b7d9b0;
+  --color-tips-heading: #2d6a27;
+  --color-tips-text: #3a5236;
+
+  /* ── Draft badge ── */
+  --color-draft-bg: #fef9c3;
+  --color-draft: #854d0e;
+  --color-draft-border: #fde68a;
+
+  /* ── Inline error box ── */
+  --color-error-bg: #fef2f2;
+  --color-error-border: #fca5a5;
+  --color-error: #b91c1c;
+
+  /* ── Review popover ── */
+  --color-popover-bg: #ffffff;
+  --color-popover-header-bg: #f0f4ff;
+  --color-popover-paraphrase-bg: #faf5ff;
+  --color-popover-paraphrase: #6d28d9;
+}
+
+/* ── Dark mode overrides ─────────────────────────────────────── */
+
+[data-theme="dark"] {
+  --color-primary: #6AA3EE;
+  --color-primary-dark: #4d8ede;
+  --color-on-primary: #08111F;
+  --color-accent: #1c2d4a;
+  --color-text: #E5EBF3;
+  --color-text-muted: #94a3b8;
+  --color-bg: #0B111C;
+  --color-border: #2A3547;
+
+  /* Ink stays the ground in dark too, one step deeper than the page */
+  --ink:    #070E1A;
+  --ink-2:  #0F1B2C;
+  --ink-3:  #1A2840;
+  --ink-rule: rgba(255, 255, 255, 0.09);
+  --ink-text: rgba(255, 255, 255, 0.92);
+  --ink-text-dim: rgba(255, 255, 255, 0.55);
+
+  --rule: #2A3547;
+
+  /* Dark chart steps are re-selected against the dark surface, not flipped:
+     the blue lightens one step (a naive lighten of both failed the lightness
+     band), the green already passes. Re-validated in dark mode. */
+  --chart-reading: #3B82F6;
+  --chart-listening: #059669;
+  --chart-grid: #232E40;
+  --chart-axis: #6B7A90;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 18px 48px -12px rgba(0, 0, 0, 0.7);
+
+  --color-card: #1e2433;
+  --color-card-alt: #252d3d;
+  --color-card-3: #1a2540;
+  --color-review-bg: #0f1117;
+
+  --color-text-dark: #f1f5f9;
+  --color-text-medium: #cbd5e1;
+  --color-text-dim: #94a3b8;
+  --color-text-faint: #64748b;
+
+  --color-border-blue: #2d3a52;
+  --color-border-table: #1f2938;
+
+  --color-flag-bg: #1e2433;
+  --color-flag-hover-bg: #3d2e0a;
+  --color-flag-hover-border: #d97706;
+  --color-flag-hover-text: #fbbf24;
+
+  --color-sel-t-bg: #052e16;
+  --color-sel-t: #4ade80;
+  --color-sel-f-bg: #2d1212;
+  --color-sel-f: #f87171;
+  --color-sel-n-bg: #1d1040;
+  --color-sel-n: #a78bfa;
+
+  --color-pal-answered: #16a34a;
+  --color-pal-flagged: #d97706;
+
+  --color-band-default-bg: #1a2540;
+  --color-band-high-bg: #052e16;
+  --color-band-high: #34d399;
+  --color-band-mid-bg: #292006;
+  --color-band-mid: #f59e0b;
+  --color-band-low-bg: #2d1212;
+  --color-band-low: #f87171;
+
+  --color-ev-correct: #1e8047;
+  --color-ev-wrong: #9e1c1c;
+  --color-ev-mixed: #8a5210;
+
+  --color-skill-reading-bg: #1e3a5f;
+  --color-skill-reading: #93c5fd;
+  --color-skill-listening-bg: #052e16;
+  --color-skill-listening: #6ee7b7;
+  --color-skill-writing-bg: #292006;
+  --color-skill-writing: #fcd34d;
+
+  --color-badge-correct-bg: #052e16;
+  --color-badge-correct: #6ee7b7;
+  --color-badge-correct-border: #166534;
+  --color-badge-wrong-bg: #450a0a;
+  --color-badge-wrong: #fca5a5;
+  --color-badge-wrong-border: #991b1b;
+
+  --color-alert-error-bg: #450a0a;
+  --color-alert-error: #fca5a5;
+  --color-alert-success-bg: #052e16;
+  --color-alert-success: #6ee7b7;
+
+  --color-audio-playing-bg: #1e3a5f;
+  --color-audio-playing: #93c5fd;
+  --color-audio-playing-border: #2d4a70;
+  --color-audio-done-bg: #052e16;
+  --color-audio-done: #6ee7b7;
+  --color-audio-done-border: #166534;
+
+  --color-tips-bg: #0f1f0e;
+  --color-tips-border: #1a4a17;
+  --color-tips-heading: #4ade80;
+  --color-tips-text: #86efac;
+
+  --color-draft-bg: #292006;
+  --color-draft: #fcd34d;
+  --color-draft-border: #422006;
+
+  --color-error-bg: #2d1212;
+  --color-error-border: #991b1b;
+  --color-error: #fca5a5;
+
+  --color-popover-bg: #1e2433;
+  --color-popover-header-bg: #1a2540;
+  --color-popover-paraphrase-bg: #1d1040;
+  --color-popover-paraphrase: #a78bfa;
+
+  --color-gold: #F59E0B;
+  --color-gold-light: #292006;
 }
 
 html,
@@ -28,6 +305,17 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Measured values — bands, timers, question counts — are always mono and
+   tabular so digits hold their column when they change. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
 }
 
 #root {
@@ -52,52 +340,95 @@ button {
 
 /* ---- Shared button styles ---- */
 .btn {
-  display: inline-block;
-  border: none;
-  border-radius: var(--radius);
-  padding: 0.7rem 1.5rem;
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 1.25rem;
+  font-size: var(--t-sm);
   font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
   text-decoration: none;
   text-align: center;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  line-height: 1.2;
+  transition: background 0.16s ease, color 0.16s ease,
+              border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease;
 }
 
 .btn:hover {
   text-decoration: none;
 }
 
+.btn:active {
+  transform: translateY(1px);
+}
+
 .btn-lg {
-  padding: 0.9rem 2rem;
-  font-size: 1.1rem;
+  padding: 0.85rem 1.75rem;
+  font-size: var(--t-base);
 }
 
 .btn-primary {
   background: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
   background: var(--color-primary-dark);
-  color: var(--color-white);
+  color: var(--color-on-primary);
+  box-shadow: 0 6px 18px -6px rgba(30, 79, 161, 0.55);
 }
 
 .btn-outline {
   background: transparent;
   color: var(--color-primary);
-  border: 2px solid var(--color-primary);
+  border-color: var(--color-border);
 }
 
 .btn-outline:hover {
   background: var(--color-accent);
   color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: none;
+  padding: 0.5rem 0.75rem;
+}
+
+.btn-ghost:hover {
+  color: var(--color-text);
+  background: var(--color-accent);
+}
+
+.btn-danger {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: #a93226;
+  color: #fff;
 }
 
 /* ---- Focus ring (accessibility) ---- */
 :focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* On the ink ground the primary blue has too little contrast to read as a
+   focus ring, so switch to a light ring there. */
+.on-ink :focus-visible {
+  outline-color: rgba(255, 255, 255, 0.85);
 }
 
 /* ---- Auth loading state ---- */
@@ -110,6 +441,50 @@ button {
   font-size: 0.95rem;
 }
 
+/* ── Theme toggle button ─────────────────────────────────────── */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.85;
+  transition: opacity 0.15s, background 0.15s;
+  font-family: var(--font);
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.theme-toggle--page {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+  opacity: 1;
+}
+
+.theme-toggle--page:hover {
+  background: var(--color-card);
+  color: var(--color-text);
+  border-color: var(--color-primary);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -117,4 +492,90 @@ button {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Explicit in-app override (Settings → Reduce motion), independent of the OS
+   setting so a candidate can turn animation off even when their system allows
+   it. Matches the media query's effect. */
+[data-reduce-motion="on"] *,
+[data-reduce-motion="on"] *::before,
+[data-reduce-motion="on"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ── Logo mark fills ─────────────────────────────────────────────────────── */
+
+/* C shape — stroke-based arc; fill must be none */
+.logo-mark .lm-c        { stroke: #111111; fill: none; }
+.logo-mark--inv .lm-c   { stroke: #ffffff; fill: none; }
+
+/* Bars — standard palette */
+.logo-mark .lm-r { fill: #1E40AF; }
+.logo-mark .lm-l { fill: #059669; }
+.logo-mark .lm-w { fill: #C4870B; }
+
+/* Inverted — for dark backgrounds (nav, hero, slides) */
+.logo-mark--inv .lm-r { fill: #60A5FA; }
+.logo-mark--inv .lm-l { fill: #34D399; }
+.logo-mark--inv .lm-w { fill: #FBBF24; }
+
+/* Dark mode: non-inv marks on dark card backgrounds */
+[data-theme="dark"] .logo-mark:not(.logo-mark--inv) .lm-c { stroke: #f1f5f9; fill: none; }
+[data-theme="dark"] .logo-mark:not(.logo-mark--inv) .lm-r { fill: #60A5FA; }
+[data-theme="dark"] .logo-mark:not(.logo-mark--inv) .lm-l { fill: #34D399; }
+[data-theme="dark"] .logo-mark:not(.logo-mark--inv) .lm-w { fill: #FBBF24; }
+
+/* ── Student highlights ──────────────────────────────────────────────────── */
+
+mark.hl {
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* ── Floating highlight bar ──────────────────────────────────────────────── */
+
+.hl-bar {
+  position: fixed;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #1a2744;
+  border-radius: 10px;
+  padding: 5px 7px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(200, 169, 74, 0.3);
+  user-select: none;
+}
+
+.hlb {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.1s, transform 0.1s;
+}
+
+.hlb:hover {
+  opacity: 0.85;
+  transform: scale(1.1);
+}
+
+.hlb-x {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+  width: auto;
+  padding: 0 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
 }

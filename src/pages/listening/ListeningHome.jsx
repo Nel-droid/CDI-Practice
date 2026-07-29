@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { useTestHistory } from '../../lib/useTestHistory'
+import { TestCard } from '../../components/TestCard'
 import '../reading/ReadingHome.css'
 import './ListeningHome.css'
 
@@ -10,6 +12,12 @@ function countQuestions(content) {
     .flatMap(s => s.groups ?? [])
     .flatMap(g => g.questions ?? [])
     .length
+}
+
+// Generic section labels — never the real recording topics.
+function partLabels(content) {
+  const n = (content?.sections ?? []).length || 4
+  return Array.from({ length: n }, (_, i) => `Part ${i + 1}`)
 }
 
 export default function ListeningHome() {
@@ -21,6 +29,7 @@ export default function ListeningHome() {
   const [error, setError] = useState('')
   const [selectedBook, setSelectedBook] = useState(null)
   const [starting, setStarting] = useState(false)
+  const { history } = useTestHistory(user, 'listening')
 
   useEffect(() => {
     let query = supabase
@@ -30,8 +39,6 @@ export default function ListeningHome() {
       .order('book')
       .order('test_label')
 
-    // Production: show published tests only.
-    // Dev (import.meta.env.DEV): show all tests so drafts can be verified locally.
     if (!import.meta.env.DEV) {
       query = query.eq('published', true)
     }
@@ -83,78 +90,104 @@ export default function ListeningHome() {
     )
   }
 
+  // ── Book landing ──────────────────────────────────────────────────────────
+  if (selectedBook === null) {
+    return (
+      <div className="rh-page rh-page--wide" data-skill="listening">
+        <header className="rh-header">
+          <h1 className="rh-title">Listening Practice</h1>
+          <p className="rh-subtitle">
+            Choose a test collection to begin. Audio plays once through all
+            four parts — you have 30 minutes to complete your answers.
+          </p>
+        </header>
+
+        {error && <p className="rh-error" role="alert">{error}</p>}
+
+        {bookNames.length === 0 ? (
+          <div className="rh-empty">
+            <p className="rh-empty-title">No tests available yet</p>
+            <p className="rh-empty-body">
+              Run <code>supabase/phase5-seed.sql</code>, then either claim
+              the draft by setting <code>created_by</code> to your user UUID
+              or set <code>published = true</code> to make it visible to all
+              authenticated users.
+            </p>
+          </div>
+        ) : (
+          <div className="rh-book-grid">
+            {bookNames.map(book => (
+              <button key={book} className="rh-book-card" onClick={() => setSelectedBook(book)}>
+                <span className="rh-bc-ghost" aria-hidden="true">{book.match(/\d+/)?.[0]}</span>
+                <div className="rh-bc-body">
+                  <div className="rh-bc-name">{book}</div>
+                  <div className="rh-bc-count">
+                    {books[book].length} test{books[book].length !== 1 ? 's' : ''}
+                  </div>
+                </div>
+                <span className="rh-bc-arrow">→</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="rh-tips">
+          <h2 className="rh-tips-title">Before you begin</h2>
+          <ul className="rh-tips-list">
+            <li>Make sure your speakers or headphones are working before you start.</li>
+            <li>Audio plays once only — you cannot pause, rewind, or replay during the test.</li>
+            <li>You can switch between Part tabs at any time while the audio plays.</li>
+            <li>The test auto-submits when the 30-minute timer reaches zero.</li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Test list view ────────────────────────────────────────────────────────
   return (
-    <div className="rh-page">
+    <div className="rh-page rh-page--wide" data-skill="listening">
+      <button className="rh-back-btn" onClick={() => setSelectedBook(null)}>
+        ← All collections
+      </button>
+
       <header className="rh-header">
-        <h1 className="rh-title">Listening Practice</h1>
+        <h1 className="rh-title">{selectedBook}</h1>
         <p className="rh-subtitle">
-          Choose a test, then click Start. Audio plays once through all four
-          parts — you have 30 minutes to complete your answers.
+          Select a test to begin. Audio plays once — the timer starts
+          immediately after you click <strong>Start</strong>.
         </p>
       </header>
 
-      {error && (
-        <p className="rh-error" role="alert">{error}</p>
-      )}
+      {error && <p className="rh-error" role="alert">{error}</p>}
 
-      {bookNames.length === 0 ? (
-        <div className="rh-empty">
-          <p className="rh-empty-title">No tests available yet</p>
-          <p className="rh-empty-body">
-            Run <code>supabase/phase5-seed.sql</code>, then either claim
-            the draft by setting <code>created_by</code> to your user UUID
-            (visible to you only) or set <code>published = true</code> to
-            make it visible to all authenticated users.
-          </p>
-        </div>
-      ) : (
-        <div className="rh-books">
-          {bookNames.map(book => (
-            <div key={book} className="rh-book-section">
-              <button
-                className={`rh-book-btn ${selectedBook === book ? 'open' : ''}`}
-                onClick={() => setSelectedBook(selectedBook === book ? null : book)}
-                aria-expanded={selectedBook === book}
-              >
-                <span className="rh-book-icon">🎧</span>
-                <span className="rh-book-name">{book}</span>
-                <span className="rh-book-count">
-                  {books[book].length} test{books[book].length !== 1 ? 's' : ''}
-                </span>
-                <span className="rh-chevron">{selectedBook === book ? '▲' : '▼'}</span>
-              </button>
-
-              {selectedBook === book && (
-                <ul className="rh-test-list" role="list">
-                  {books[book].map(test => (
-                    <li key={test.id} className="rh-test-item">
-                      <div className="rh-test-info">
-                        <span className="rh-test-label">
-                          {test.test_label}
-                          {import.meta.env.DEV && !test.published && (
-                            <span className="rh-draft-badge">DRAFT</span>
-                          )}
-                        </span>
-                        <span className="rh-test-meta">
-                          Academic Listening · {countQuestions(test.content)} questions · 30 min
-                        </span>
-                      </div>
-                      <button
-                        className="btn btn-primary rh-start-btn"
-                        onClick={() => startTest(test)}
-                        disabled={starting}
-                        aria-label={`Start ${test.test_label} from ${book}`}
-                      >
-                        {starting ? 'Starting…' : 'Start test →'}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="test-grid">
+        {books[selectedBook].map(test => {
+          const h = history[test.id]
+          const done = h?.count > 0
+          const isDraft = import.meta.env.DEV && !test.published
+          const status = done ? 'done' : h?.inProgress ? 'inprogress' : 'notdone'
+          return (
+            <TestCard
+              key={test.id}
+              title={test.test_label + (isDraft ? '  ·  DRAFT' : '')}
+              ghost={test.test_label.match(/\d+/)?.[0]}
+              status={status}
+              items={partLabels(test.content)}
+              meta={`Academic Listening · ${countQuestions(test.content)} questions · 30 min`}
+              ctaLabel={starting ? '…' : done ? 'Retake' : 'Start'}
+              disabled={starting}
+              onStart={() => startTest(test)}
+              footer={h && (h.best != null || done) ? (
+                <>
+                  {h.best != null && <span>Best <span className="num">{h.best}</span></span>}
+                  {done && <span className="num">{h.count} attempt{h.count === 1 ? '' : 's'}</span>}
+                </>
+              ) : null}
+            />
+          )
+        })}
+      </div>
 
       <div className="rh-tips">
         <h2 className="rh-tips-title">Before you begin</h2>
