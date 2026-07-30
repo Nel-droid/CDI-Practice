@@ -1790,20 +1790,25 @@ def write_sql(test_json: dict, book_num: int, test_num: int) -> None:
     out_file = OUT_DIR / f"cambridge{book_num}-test{test_num}-reading.sql"
     content = json.dumps(test_json, ensure_ascii=False, indent=2)
 
-    sql = f"""DELETE FROM public.tests
-WHERE skill = 'reading' AND book = 'Cambridge IELTS {book_num}' AND test_label = 'Test {test_num}';
+    book = f"Cambridge IELTS {book_num}"
+    label = f"Test {test_num}"
+    # Upsert by (skill, book, test_label) so re-seeding keeps the existing row id
+    # — and any attempts that reference it — instead of DELETE+INSERT (which minted
+    # a new id and orphaned old attempts, breaking their post-exam review).
+    sql = f"""UPDATE public.tests
+   SET variant = 'academic', duration_seconds = 3600, published = true,
+       content = ${tag}$
+{content}
+${tag}$::jsonb
+ WHERE skill = 'reading' AND book = '{book}' AND test_label = '{label}';
 
 INSERT INTO public.tests (skill, book, test_label, variant, duration_seconds, content, published)
-VALUES (
-  'reading',
-  'Cambridge IELTS {book_num}',
-  'Test {test_num}',
-  'academic',
-  3600,
-  ${tag}$
+SELECT 'reading', '{book}', '{label}', 'academic', 3600, ${tag}i$
 {content}
-${tag}$,
-  true
+${tag}i$::jsonb, true
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.tests
+   WHERE skill = 'reading' AND book = '{book}' AND test_label = '{label}'
 );
 """
     out_file.write_text(sql, encoding="utf-8")
