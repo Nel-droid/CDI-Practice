@@ -1,0 +1,502 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SETTINGS — a section rail + panel, like a real preferences screen. Each
+   control saves itself; only destructive actions confirm. Calibrated system.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.settings-kicker {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin: 0 0 0.6rem;
+}
+
+.settings-title {
+  font-family: var(--font-display);
+  font-size: var(--t-2xl);
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* ── Shell: rail + panel ── */
+
+.settings-shell {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.settings-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  position: sticky;
+  top: 1.5rem;
+}
+
+.settings-rail-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.75rem;
+  font-family: var(--font);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.settings-rail-item svg { flex-shrink: 0; opacity: 0.8; }
+
+.settings-rail-item:hover { background: var(--color-card); color: var(--color-text); }
+
+.settings-rail-item.is-active {
+  background: var(--color-card);
+  color: var(--color-text);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--color-gold);
+}
+
+.settings-panel {
+  min-width: 0;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1.75rem 1.75rem;
+}
+
+.settings-section-title {
+  font-family: var(--font-display);
+  font-size: var(--t-lg);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: var(--color-text);
+  margin: 1.25rem 0 0.25rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--color-text);
+}
+
+/* ── Row ── */
+
+.setting-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.35rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.setting-row--stack { align-items: start; }
+
+/* Full-width row: label on top, control spans the whole width below. */
+.setting-row--full { grid-template-columns: 1fr; gap: 1rem; }
+.setting-row--full .setting-label p { max-width: none; }
+
+.setting-label h3 {
+  font-size: var(--t-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.25rem;
+}
+
+.setting-label p {
+  font-size: var(--t-sm);
+  line-height: 1.55;
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 44ch;
+}
+
+.setting-control { justify-self: end; }
+
+.setting-static { font-size: var(--t-sm); color: var(--color-text-muted); }
+
+.setting-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end; }
+
+/* ── Avatar + swatches ── */
+
+.setting-avatar { display: flex; align-items: center; gap: 1.1rem; }
+
+.setting-avatar-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.setting-swatches {
+  display: grid;
+  grid-template-columns: repeat(8, auto);
+  gap: 0.4rem;
+}
+
+.setting-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px var(--color-border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.12s ease;
+}
+
+.setting-swatch:hover { transform: scale(1.12); }
+
+.setting-swatch.is-active {
+  border-color: var(--color-card);
+  box-shadow: 0 0 0 2px var(--color-text);
+}
+
+/* ── Account id card ── */
+
+.setting-idcard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 0 1.35rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.setting-idcard-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+
+.setting-idcard-name { font-size: var(--t-md); font-weight: 600; color: var(--color-text); }
+.setting-idcard-email { font-size: var(--t-sm); color: var(--color-text-muted); }
+.setting-idcard-joined { font-size: var(--t-xs); color: var(--color-text-faint); margin-top: 0.15rem; }
+
+/* ── Name / password fields ── */
+
+.setting-name { display: inline-flex; align-items: center; gap: 0.6rem; }
+
+.setting-name input,
+.setting-password input,
+.setting-delete input {
+  width: 15rem;
+  max-width: 46vw;
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font);
+  font-size: var(--t-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.setting-name input:focus,
+.setting-password input:focus,
+.setting-delete input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
+}
+
+.setting-saved {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--color-band-high);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.setting-saved.is-shown { opacity: 1; }
+
+.setting-password { display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-end; }
+.setting-inline-msg { font-size: var(--t-xs); color: var(--color-text-muted); margin: -0.2rem 0 0; }
+.setting-inline-msg--err { color: var(--color-error); }
+
+/* ── Target chips ── */
+
+.setting-targets { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+.setting-target {
+  min-width: 2.6rem;
+  padding: 0.4rem 0.6rem;
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease, background 0.16s ease;
+}
+
+.setting-target:hover { border-color: var(--color-gold); color: var(--color-gold); }
+.setting-target.is-active { background: var(--color-gold); border-color: var(--color-gold); color: var(--ink); }
+
+/* ── Background theme picker ── */
+
+.setting-bg-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 0.7rem;
+  width: 100%;
+}
+
+.setting-bg-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+.setting-bg-preview {
+  display: block;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-border);
+  background-color: var(--color-bg);
+  transition: border-color 0.15s ease, transform 0.12s ease;
+}
+.setting-bg-tile:hover .setting-bg-preview { transform: translateY(-2px); }
+.setting-bg-tile.is-active .setting-bg-preview {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+.setting-bg-name {
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+.setting-bg-tile.is-active .setting-bg-name { color: var(--color-text); font-weight: 600; }
+
+/* Preview fills — miniature versions of each theme */
+.setting-bg-preview[data-bg='none'] {
+  background-image:
+    radial-gradient(70% 60% at 90% 0%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent 60%),
+    radial-gradient(70% 60% at 0% 100%, color-mix(in srgb, var(--color-gold) 18%, transparent), transparent 60%);
+}
+/* Dark-mode backdrops */
+.setting-bg-preview[data-bg='deepsea'] {
+  background-image:
+    radial-gradient(60% 60% at 25% 20%, rgba(22,96,116,0.85), transparent 65%),
+    radial-gradient(60% 60% at 75% 80%, rgba(10,48,62,0.9), transparent 65%);
+  background-color: #061318;
+}
+.setting-bg-preview[data-bg='facets'] {
+  background-image:
+    linear-gradient(135deg, rgba(124,58,237,0.7), transparent 60%),
+    linear-gradient(300deg, rgba(59,29,110,0.7), transparent 60%);
+  background-color: #140a24;
+}
+.setting-bg-preview[data-bg='plexus'] {
+  background-image:
+    linear-gradient(135deg, rgba(47,214,195,0.5), transparent 55%),
+    radial-gradient(circle at 30% 40%, rgba(47,214,195,0.9) 1.5px, transparent 2px),
+    radial-gradient(circle at 70% 65%, rgba(47,214,195,0.9) 1.5px, transparent 2px);
+  background-color: #0a1a18;
+}
+.setting-bg-preview[data-bg='flux'] {
+  background-image:
+    radial-gradient(circle at 25% 60%, rgba(52,224,207,0.95) 1.5px, transparent 2px),
+    radial-gradient(circle at 55% 40%, rgba(52,224,207,0.95) 1.5px, transparent 2px),
+    radial-gradient(circle at 80% 62%, rgba(52,224,207,0.95) 1.5px, transparent 2px),
+    radial-gradient(70% 60% at 70% 50%, rgba(24,150,140,0.4), transparent 62%);
+  background-color: #071716;
+}
+.setting-bg-preview[data-bg='waves'] {
+  background-image: linear-gradient(110deg, rgba(47,123,214,0.75), rgba(124,77,214,0.7) 55%, rgba(214,77,107,0.7));
+  background-color: #0a0e1e;
+}
+.setting-bg-preview[data-bg='fluid'] {
+  background-image:
+    radial-gradient(60% 60% at 20% 30%, rgba(150,60,170,0.7), transparent 62%),
+    radial-gradient(60% 60% at 80% 75%, rgba(48,70,200,0.7), transparent 62%),
+    linear-gradient(125deg, #3a1652, #1a2370);
+  background-color: #241a5e;
+}
+
+/* Light-mode backdrops */
+.setting-bg-preview[data-bg='prism'] {
+  background-image:
+    linear-gradient(135deg, rgba(201,169,255,0.8), transparent 55%),
+    linear-gradient(300deg, rgba(169,201,255,0.8), transparent 55%);
+  background-color: #e6e2fb;
+}
+.setting-bg-preview[data-bg='sky'] {
+  background-image:
+    radial-gradient(circle at 35% 55%, rgba(255,255,255,0.9) 1.5px, transparent 2px),
+    radial-gradient(circle at 65% 35%, rgba(255,255,255,0.9) 1.5px, transparent 2px),
+    linear-gradient(160deg, #eaf3fb, #cfe2f5);
+}
+.setting-bg-preview[data-bg='bloom'] {
+  background-image: linear-gradient(125deg, #f6d7ea, #dcc9f2 45%, #cfe0fb);
+}
+.setting-bg-preview[data-bg='flare'] {
+  background-image:
+    radial-gradient(50% 60% at 8% 8%, rgba(255,246,224,0.95), transparent 55%),
+    linear-gradient(150deg, #c3e7e0, #d2dbf0 46%, #f4d0e5);
+}
+.setting-bg-preview[data-bg='drift'] {
+  background-image:
+    radial-gradient(45% 55% at 30% 45%, rgba(255,255,255,0.4), transparent 60%),
+    linear-gradient(120deg, #cbb9f5, #dcc6f2 34%, #f3c9e4 68%, #c2e1f6);
+}
+
+/* ── Segmented control (appearance) ── */
+
+.setting-seg {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.setting-seg-opt {
+  padding: 0.4rem 0.85rem;
+  font-family: var(--font);
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.setting-seg-opt.is-active {
+  color: var(--color-text);
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Text size stepper ── */
+
+.setting-textsize { display: inline-flex; align-items: center; gap: 0.6rem; }
+
+.setting-step {
+  min-width: 2.2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.16s ease, color 0.16s ease;
+}
+
+.setting-step:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+.setting-step:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.setting-textsize-preview {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  min-width: 1.75rem;
+  font-family: var(--font-display);
+  color: var(--color-text);
+  line-height: 1;
+}
+
+/* ── Switch ── */
+
+.setting-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: var(--color-border);
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.setting-switch.is-on { background: var(--color-primary); }
+
+.setting-switch-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.setting-switch.is-on .setting-switch-knob { transform: translateX(20px); }
+
+/* ── Danger ── */
+
+.setting-danger-btn {
+  color: var(--color-error);
+  background: transparent;
+  border: 1px solid var(--color-error-border);
+}
+
+.setting-danger-btn:hover:not(:disabled) { background: var(--color-error-bg); color: var(--color-error); }
+.setting-danger-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.setting-confirm-q { font-size: var(--t-sm); font-weight: 600; color: var(--color-text); }
+.setting-cleared { font-size: var(--t-sm); font-weight: 600; color: var(--color-band-high); }
+
+.setting-delete { display: flex; flex-direction: column; gap: 0.7rem; align-items: flex-end; }
+.setting-delete-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-end;
+  font-size: var(--t-sm);
+  color: var(--color-text-muted);
+}
+.setting-delete-label b { color: var(--color-text); }
+
+/* ── Responsive: rail becomes a top tab strip ── */
+
+@media (max-width: 760px) {
+  .settings-shell { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .settings-rail {
+    position: static;
+    flex-direction: row;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 0.5rem;
+  }
+  .settings-rail::-webkit-scrollbar { display: none; }
+  .settings-rail-item { white-space: nowrap; }
+  .settings-rail-item.is-active { box-shadow: inset 0 -2px 0 var(--color-gold); }
+  .settings-panel { padding: 0.25rem 1.15rem 1.25rem; }
+}
+
+@media (max-width: 620px) {
+  .setting-row { grid-template-columns: minmax(0, 1fr); gap: 0.85rem; }
+  .setting-control { justify-self: start; }
+  .setting-name input, .setting-password input, .setting-delete input { max-width: 100%; width: 100%; }
+  .setting-password, .setting-delete { align-items: stretch; }
+  .setting-actions { justify-content: flex-start; }
+}

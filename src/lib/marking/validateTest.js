@@ -5,6 +5,19 @@ function isAnswerMissing(q) {
   return false
 }
 
+// Matches instruction phrasing like "Label the map below" / "Label the plan"
+// / "Label the diagram below" — the standard IELTS prompt for a group that
+// requires a visual asset to be answerable at all.
+const DIAGRAM_INSTRUCTION_RE = /\blabel\b[^.]*\b(map|plan|diagram)\b/i
+
+function groupRange(g) {
+  const nums = (g.questions ?? []).map(q => q.number).filter(n => n != null)
+  if (nums.length === 0) return '?'
+  const lo = Math.min(...nums)
+  const hi = Math.max(...nums)
+  return lo === hi ? `Q${lo}` : `Q${lo}-${hi}`
+}
+
 /**
  * Validates a published test row and logs console warnings for any structural
  * problems: wrong question count (suppresses band scores) or individual
@@ -15,9 +28,8 @@ function isAnswerMissing(q) {
  */
 export function warnIfMisaligned(testRow) {
   const sections = testRow?.content?.sections ?? []
-  const questions = sections
-    .flatMap(s => s.groups ?? [])
-    .flatMap(g => g.questions ?? [])
+  const groups = sections.flatMap(s => s.groups ?? [])
+  const questions = groups.flatMap(g => g.questions ?? [])
 
   const totalSlots = questions.length
 
@@ -39,6 +51,13 @@ export function warnIfMisaligned(testRow) {
       console.warn(`[CDI] Published test "${testRow.test_label}" — missing evidence.quote on Q${missingEvidence.join(', Q')}`)
     if (missingExplanation.length > 0)
       console.warn(`[CDI] Published test "${testRow.test_label}" — missing explanation on Q${missingExplanation.join(', Q')}`)
+
+    const missingDiagramImage = groups
+      .filter(g => DIAGRAM_INSTRUCTION_RE.test(g.instructions ?? '') && !g.mapImage && !g.diagramImage)
+      .map(groupRange)
+
+    if (missingDiagramImage.length > 0)
+      console.warn(`[CDI] Published test "${testRow.test_label}" — group instructions reference a map/plan/diagram but no mapImage/diagramImage is set (${missingDiagramImage.join(', ')})`)
   }
 
   return totalSlots

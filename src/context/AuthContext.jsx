@@ -44,10 +44,26 @@ export function AuthProvider({ children }) {
   const signIn = (email, password) =>
     supabase.auth.signInWithPassword({ email, password })
 
+  const signInWithGoogle = () =>
+    supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/dashboard` },
+    })
+
+  // Sends the recovery email. The link lands on /reset-password, which
+  // exchanges the token for a short-lived session and lets the user set
+  // a new password.
+  const sendPasswordReset = (email) =>
+    supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+
   const signOut = () => supabase.auth.signOut()
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{ user, loading, signUp, signIn, signInWithGoogle, sendPasswordReset, signOut }}
+    >
       {children}
     </AuthContext.Provider>
   )

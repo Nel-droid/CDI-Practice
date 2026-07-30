@@ -3,3 +3,28 @@ dist
 .env
 .env.local
 .env.*.local
+
+# Licensed source books and documents — never commit
+books/
+Cambridge_10.pdf
+Cambridge\ 10\ Test\ 1.pdf
+Full\ Test.pdf
+Task\ 1\ charts.pdf
+Task\ 2\ topics.pdf
+Transcribes.docx
+task\ 1.docx
+
+# OCR scratch output — intermediate files, never final content
+ocr_output/
+
+.vercel
+.env*
+
+# Large media & local source assets — kept locally / in Supabase Storage, never in git
+Listening audios/
+Listening Books/
+supabase/listening-maps/
+
+# Python cache
+__pycache__/
+*.pyc

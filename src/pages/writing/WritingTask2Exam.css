@@ -1,0 +1,220 @@
+/* ── Writing Task 2 layout ────────────────────────────────────── */
+
+.wt2-layout {
+  /* Inherits .exam-layout from ReadingExam.css */
+}
+
+.wt2-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Countdown timer ──────────────────────────────────────────── */
+
+.wt2-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px;
+  padding: 0.3em 0.85em;
+  white-space: nowrap;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.wt2-timer-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+  color: #fff;
+}
+
+.wt2-timer-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+/* Warning: < 5 minutes */
+.wt2-timer-warn {
+  background: rgba(180, 100, 0, 0.55);
+  border-color: rgba(255, 180, 60, 0.6);
+}
+
+/* Danger: < 1 minute */
+.wt2-timer-danger {
+  background: rgba(180, 30, 30, 0.65);
+  border-color: rgba(255, 100, 100, 0.7);
+  animation: wt2-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes wt2-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+/* ── Time's up banner ─────────────────────────────────────────── */
+
+.wt2-timeup-banner {
+  background: #c53030;
+  color: #fff;
+  text-align: center;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ── Question column (left, 40%) ──────────────────────────────── */
+
+.wt2-question-col {
+  width: 40%;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 2px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.wt2-question-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.wt2-task-instructions {
+  background: var(--color-card-3);
+  border: 1px solid var(--color-border-blue);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.wt2-task-instructions p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+}
+
+.wt2-task-instructions strong {
+  color: var(--color-text-medium);
+}
+
+.wt2-question-box {
+  border-left: 4px solid var(--color-primary);
+  padding: 0.75rem 1rem;
+  background: var(--color-accent);
+  border-radius: 0 8px 8px 0;
+}
+
+.wt2-question-text {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--color-text);
+}
+
+/* ── Editor column (right, 60%) ───────────────────────────────── */
+
+.wt2-editor-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.wt2-textarea {
+  flex: 1;
+  width: 100%;
+  resize: none;
+  border: none;
+  outline: none;
+  padding: 1.5rem;
+  font-size: 1.05rem;
+  font-family: var(--font);
+  line-height: 1.8;
+  color: var(--color-text);
+  background: var(--color-bg);
+  box-sizing: border-box;
+}
+
+.wt2-textarea::placeholder {
+  color: var(--color-text-faint);
+}
+
+.wt2-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Word count bar ───────────────────────────────────────────── */
+
+.wt2-wordcount-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-card);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.wt2-wordcount-num {
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.wt2-wordcount-min {
+  font-size: 0.82rem;
+  color: var(--color-text-faint);
+}
+
+.wt2-wordcount-ok {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-band-high);
+}
+
+/* ── Mobile ───────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .wt2-body {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .wt2-question-col {
+    width: 100%;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 2px solid var(--color-border);
+    flex-shrink: 0;
+    max-height: 45vh;
+  }
+
+  .wt2-editor-col {
+    flex: none;
+    min-height: 300px;
+  }
+
+  .wt2-textarea {
+    flex: none;
+    min-height: 220px;
+  }
+}

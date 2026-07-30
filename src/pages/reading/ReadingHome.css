@@ -1,106 +1,154 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   READING HOME (shared with Listening)
+   ─────────────────────────────────────────────────────────────────────────
+   data-skill="reading"   → --skill-color: reading blue
+   data-skill="listening" → --skill-color: listening green
+   data-skill="writing"   → --skill-color: gold  (used by WritingHome)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-skill="reading"]  { --skill-color: var(--color-skill-reading);   }
+[data-skill="listening"]{ --skill-color: var(--color-skill-listening); }
+[data-skill="writing"]  { --skill-color: var(--color-gold, #C4870B);   }
+
+/* ── Page container ── */
 .rh-page {
   max-width: 760px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
 }
 
+/* Wide variant for the card-grid test lists — fills the screen on laptop. */
+.rh-page--wide { max-width: 1160px; }
+
+/* ── Loading ── */
 .rh-loading {
   text-align: center;
   padding: 4rem 1rem;
-  color: #555;
-  font-size: 1.1rem;
+  color: var(--color-text-dim);
+  font-size: 1.05rem;
 }
 
+/* ── Page header ── */
 .rh-header {
   margin-bottom: 2.5rem;
+  padding-left: 1.25rem;
+  border-left: 4px solid var(--skill-color, var(--color-primary));
 }
 
 .rh-title {
+  font-family: var(--font-display, Georgia, serif);
   font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0 0 0.5rem;
+  font-weight: normal;
+  color: var(--color-text-dark);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+  line-height: 1.15;
 }
 
 .rh-subtitle {
-  color: #444;
+  color: var(--color-text-muted);
   line-height: 1.6;
-  font-size: 1.05rem;
+  font-size: 1rem;
   margin: 0;
 }
 
+/* ── Inline error ── */
 .rh-error {
-  background: #fef2f2;
-  border: 1px solid #fca5a5;
-  color: #b91c1c;
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error);
   padding: 0.75rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   margin-bottom: 1.5rem;
+  font-size: 0.95rem;
 }
 
-/* ---- Empty state ---- */
+/* ── Empty state ── */
 .rh-empty {
-  background: #f8faff;
-  border: 2px dashed #c7d7f0;
+  background: color-mix(in srgb, var(--color-card) 78%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+  border: 2px dashed color-mix(in srgb, var(--color-border-blue) 70%, transparent);
   border-radius: 12px;
   padding: 2.5rem 2rem;
   text-align: center;
 }
 
 .rh-empty-title {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #333;
-  margin: 0 0 0.5rem;
+  color: var(--color-text-medium);
+  margin: 0 0 0.4rem;
 }
 
 .rh-empty-body {
-  color: #555;
+  color: var(--color-text-dim);
   line-height: 1.6;
   margin: 0;
+  font-size: 0.95rem;
 }
 
 .rh-empty-body code {
-  background: #e9f0ff;
+  background: var(--color-accent);
   padding: 0.1em 0.4em;
   border-radius: 4px;
-  font-size: 0.9em;
+  font-size: 0.88em;
 }
 
-/* ---- Book list ---- */
+/* ── Book list ── */
 .rh-books {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 2.5rem;
 }
 
 .rh-book-section {
-  border: 1px solid #d0daf0;
-  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
   overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
+.rh-book-section:has(.open) {
+  border-color: var(--skill-color, var(--color-primary));
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+
+/* ── Book toggle button ── */
 .rh-book-btn {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: #f5f8ff;
+  gap: 0.85rem;
+  padding: 0.95rem 1.25rem;
+  background: var(--color-card-alt);
   border: none;
   cursor: pointer;
   font-size: 1rem;
   font-family: inherit;
   text-align: left;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
+  color: var(--color-text);
+}
+
+/* CSS bar indicator replaces emoji */
+.rh-book-btn::before {
+  content: '';
+  display: block;
+  width: 3px;
+  height: 1.3em;
+  border-radius: 2px;
+  background: var(--skill-color, var(--color-primary));
+  flex-shrink: 0;
+  opacity: 0.65;
+  transition: background 0.15s, opacity 0.15s;
 }
 
 .rh-book-btn:hover,
 .rh-book-btn:focus-visible {
-  background: #e8f0ff;
-  outline: 2px solid var(--color-primary);
-  outline-offset: -2px;
+  background: var(--color-card-3);
+  outline: none;
 }
 
 .rh-book-btn.open {
@@ -108,24 +156,40 @@
   color: #fff;
 }
 
-.rh-book-icon { font-size: 1.2rem; }
+.rh-book-btn.open::before {
+  background: rgba(255, 255, 255, 0.35);
+  opacity: 1;
+}
+
+/* Hide the emoji span — CSS bar above replaces it */
+.rh-book-icon {
+  display: none;
+}
 
 .rh-book-name {
   flex: 1;
-  font-weight: 600;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.05rem;
+  font-weight: normal;
+  color: var(--color-text-dark);
+}
+
+.rh-book-btn.open .rh-book-name {
+  color: #fff;
 }
 
 .rh-book-count {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   opacity: 0.7;
+  font-variant-numeric: tabular-nums;
 }
 
 .rh-chevron {
-  font-size: 0.8rem;
-  opacity: 0.7;
+  font-size: 0.7rem;
+  opacity: 0.55;
 }
 
-/* ---- Test list ---- */
+/* ── Test list ── */
 .rh-test-list {
   list-style: none;
   margin: 0;
@@ -137,13 +201,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.25rem;
-  border-top: 1px solid #e4ecff;
-  background: #fff;
+  padding: 1rem 1.25rem 1rem 1.5rem;
+  border-top: 1px solid var(--color-border-table);
+  background: var(--color-card);
+  transition: background 0.12s;
 }
 
 .rh-test-item:hover {
-  background: #fafcff;
+  background: var(--color-card-alt);
 }
 
 .rh-test-info {
@@ -155,37 +220,287 @@
 .rh-test-label {
   font-weight: 600;
   font-size: 1rem;
-  color: #222;
+  color: var(--color-text-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .rh-test-meta {
-  font-size: 0.85rem;
-  color: #666;
+  font-size: 0.82rem;
+  color: var(--color-text-faint);
 }
 
 .rh-start-btn {
   white-space: nowrap;
   flex-shrink: 0;
+  font-size: 0.88rem;
+  padding: 0.5rem 1.15rem;
+  border-radius: 8px;
 }
 
-/* ---- Tips ---- */
+/* ── Per-test history ─────────────────────────────────────────────────────
+   What this candidate already did with this paper, so they never have to
+   remember which of twenty-four Cambridge tests they have sat. */
+
+.rh-test-info { flex: 1; min-width: 0; }
+
+.rh-done {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  font-size: 0.7rem;
+  color: var(--color-badge-correct);
+  background: var(--color-badge-correct-bg);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rh-test-history {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-left: auto;
+  margin-right: 0.5rem;
+  white-space: nowrap;
+}
+
+.rh-best {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.rh-best strong {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.rh-attempts {
+  font-size: 0.78rem;
+  color: var(--color-text-faint);
+}
+
+.rh-inprogress {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-draft);
+  background: var(--color-draft-bg);
+  border: 1px solid var(--color-draft-border);
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .rh-test-history {
+    margin-left: 0;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* Draft badge (DEV only) */
+.rh-draft-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.1em 0.45em;
+  border-radius: 4px;
+  background: var(--color-draft-bg);
+  color: var(--color-draft);
+  border: 1px solid var(--color-draft-border);
+  vertical-align: middle;
+}
+
+/* ── Tips ── */
 .rh-tips {
-  background: #f0f7ee;
-  border: 1px solid #b7d9b0;
+  background: color-mix(in srgb, var(--color-card) 78%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  border-left: 4px solid var(--skill-color, var(--color-primary));
   border-radius: 10px;
   padding: 1.25rem 1.5rem;
 }
 
 .rh-tips-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2d6a27;
-  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-text-muted);
+  margin: 0 0 0.8rem;
 }
 
 .rh-tips-list {
   margin: 0;
   padding: 0 0 0 1.25rem;
-  color: #3a5236;
-  line-height: 1.7;
+  color: var(--color-text);
+  line-height: 1.75;
+  font-size: 0.92rem;
+}
+
+.rh-tips-list li + li {
+  margin-top: 0.25rem;
+}
+
+/* ── Back navigation button ── */
+.rh-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  padding: 0 0 0.15rem;
+  margin-bottom: 1.75rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  letter-spacing: 0.01em;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.rh-back-btn:hover {
+  color: var(--skill-color, var(--color-primary));
+  border-bottom-color: var(--skill-color, var(--color-primary));
+}
+
+/* ── Book card grid ── */
+.rh-book-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.4rem;
+  margin-bottom: 2.75rem;
+}
+
+.rh-book-card {
+  --accent: var(--skill-color, var(--color-primary));
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 122px;
+  padding: 1.9rem 1.9rem 1.9rem 1.8rem;
+  background:
+    linear-gradient(158deg, color-mix(in srgb, var(--accent) 12%, transparent), transparent 46%),
+    color-mix(in srgb, var(--color-card) 80%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(135%);
+  backdrop-filter: blur(16px) saturate(135%);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  border-left: 5px solid var(--accent);
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(16, 27, 45, 0.04), 0 14px 34px -24px rgba(16, 27, 45, 0.45);
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+}
+
+.rh-book-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 4px rgba(16, 27, 45, 0.06),
+              0 18px 38px -20px color-mix(in srgb, var(--accent) 40%, rgba(16, 27, 45, 0.5));
+}
+
+/* Large faint book number watermark */
+.rh-bc-ghost {
+  position: absolute;
+  right: 4.6rem;
+  bottom: -1.8rem;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 7.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.07;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.rh-book-card:hover .rh-bc-ghost { opacity: 0.11; transform: translateX(4px); }
+
+.rh-bc-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.rh-bc-name {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.55rem;
+  font-weight: normal;
+  letter-spacing: -0.01em;
+  color: var(--color-text-dark);
+  line-height: 1.2;
+}
+
+.rh-bc-count {
+  font-size: 0.92rem;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rh-bc-arrow {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  color: var(--accent, var(--color-primary));
+  background: color-mix(in srgb, var(--accent, var(--color-primary)) 12%, transparent);
+  opacity: 0.9;
+  transition: opacity 0.15s, transform 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.rh-book-card:hover .rh-bc-arrow {
+  background: color-mix(in srgb, var(--accent, var(--color-primary)) 18%, transparent);
+}
+
+.rh-book-card:hover .rh-bc-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+/* ── Tests container (standalone drill-down view) ── */
+.rh-tests-container {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+}
+
+.rh-tests-container .rh-test-item:first-child {
+  border-top: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .rh-book-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rh-test-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rh-start-btn {
+    align-self: flex-end;
+  }
 }

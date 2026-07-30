@@ -1,0 +1,51 @@
+.wft-layout {
+  /* Inherits .exam-layout from ReadingExam.css */
+}
+
+/* ── Task tab switcher ────────────────────────────────────────── */
+
+.wft-tab-bar {
+  display: flex;
+  border-bottom: 2px solid var(--color-border);
+  background: var(--color-card);
+  flex-shrink: 0;
+}
+
+.wft-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.75rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.wft-tab:hover {
+  color: var(--color-primary);
+}
+
+.wft-tab-active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.wft-tab-wc {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15em 0.5em;
+  border-radius: 3px;
+  background: var(--color-accent);
+}
+
+.wft-tab-wc.wc-good { color: var(--color-band-high); }
+.wft-tab-wc.wc-warn { color: var(--color-band-mid);  }
+.wft-tab-wc.wc-low  { color: var(--color-sel-f);     }

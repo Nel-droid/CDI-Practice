@@ -1,0 +1,184 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHARTS — recessive grid, thin marks, text in text tokens (never the series
+   colour), identity carried by legend + direct labels as well as hue.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.chart {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* ── Legend ── */
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: var(--t-xs);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.chart-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.chart-swatch--target {
+  height: 0;
+  border-top: 2px dashed var(--color-gold);
+  border-radius: 0;
+  width: 14px;
+}
+
+.chart-legend-item--target { color: var(--color-gold); }
+
+/* ── SVG text ── */
+
+.chart-tick {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--chart-axis);
+}
+
+.chart-endlabel {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-caption {
+  font-size: var(--t-xs);
+  color: var(--color-text-muted);
+  min-height: 1.2em;
+}
+
+/* ── Table view ── */
+
+.chart-table summary {
+  font-size: var(--t-xs);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.chart-table summary:hover { color: var(--color-text); }
+
+.chart-table table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: var(--t-xs);
+}
+
+.chart-table th,
+.chart-table td {
+  text-align: left;
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--color-text-muted);
+}
+
+.chart-table th {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HORIZONTAL BARS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.bar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  /* 2px surface gap between adjacent fills */
+  gap: 0.55rem;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.15rem 0;
+  transition: opacity 0.14s ease;
+}
+
+.bar-label {
+  font-size: var(--t-sm);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bar-track {
+  position: relative;
+  height: 10px;
+  background: var(--chart-grid);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--chart-reading);
+  /* 4px rounded data-end, anchored flat to the baseline */
+  border-radius: 0 5px 5px 0;
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.bar-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.bar-frac {
+  font-size: var(--t-xs);
+  color: var(--color-text-faint);
+}
+
+.bar-row.is-hover .bar-label { color: var(--color-text); }
+.bar-list:has(.is-hover) .bar-row:not(.is-hover) { opacity: 0.55; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bar-fill { transition: none; }
+}
+
+@media (max-width: 640px) {
+  .bar-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'label value'
+      'track track';
+    gap: 0.3rem 0.75rem;
+  }
+  .bar-label { grid-area: label; white-space: normal; }
+  .bar-value { grid-area: value; }
+  .bar-track { grid-area: track; }
+}

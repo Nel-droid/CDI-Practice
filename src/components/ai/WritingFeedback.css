@@ -1,0 +1,85 @@
+.aiwf-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius, 12px);
+  padding: 1.5rem 1.6rem;
+  margin-top: 1.25rem;
+}
+
+.aiwf-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.aiwf-title {
+  font-family: var(--font-display, inherit);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--color-text);
+  margin: 0 0 0.2rem;
+}
+.aiwf-sub { font-size: 0.86rem; color: var(--color-text-muted); margin: 0; max-width: 46ch; }
+.aiwf-run { white-space: nowrap; }
+
+.aiwf-loading { font-size: 0.9rem; color: var(--color-text-muted); margin: 1.1rem 0 0; }
+
+.aiwf-error { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
+.aiwf-error p { color: var(--color-error); font-size: 0.9rem; margin: 0; }
+
+/* ── Result ── */
+.aiwf-result { margin-top: 1.35rem; display: flex; flex-direction: column; gap: 1.4rem; }
+
+.aiwf-band-row { display: flex; gap: 1.3rem; align-items: center; flex-wrap: wrap; }
+
+.aiwf-band {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 16px;
+  border: 2px solid var(--color-border);
+}
+.aiwf-band.is-high { background: var(--color-band-high-bg); border-color: var(--color-band-high); }
+.aiwf-band.is-mid  { background: var(--color-band-mid-bg);  border-color: var(--color-band-mid); }
+.aiwf-band.is-low  { background: var(--color-band-low-bg);  border-color: var(--color-band-low); }
+.aiwf-band-num { font-size: 2.1rem; font-weight: 700; line-height: 1; }
+.aiwf-band.is-high .aiwf-band-num { color: var(--color-band-high); }
+.aiwf-band.is-mid  .aiwf-band-num { color: var(--color-band-mid); }
+.aiwf-band.is-low  .aiwf-band-num { color: var(--color-band-low); }
+.aiwf-band-lab { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin-top: 0.35rem; }
+
+.aiwf-summary { flex: 1; min-width: 220px; font-size: 0.95rem; line-height: 1.55; color: var(--color-text); margin: 0; }
+
+/* ── Criteria ── */
+.aiwf-criteria { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.9rem; }
+.aiwf-crit { background: var(--color-card-alt); border: 1px solid var(--color-border); border-radius: 10px; padding: 0.85rem 0.95rem; }
+.aiwf-crit-top { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; }
+.aiwf-crit-name { font-size: 0.85rem; font-weight: 600; color: var(--color-text); }
+.aiwf-crit-band { font-size: 1.05rem; font-weight: 700; }
+.aiwf-crit-band.is-high { color: var(--color-band-high); }
+.aiwf-crit-band.is-mid  { color: var(--color-band-mid); }
+.aiwf-crit-band.is-low  { color: var(--color-band-low); }
+.aiwf-crit-comment { font-size: 0.83rem; line-height: 1.5; color: var(--color-text-muted); margin: 0; }
+
+/* ── Lists ── */
+.aiwf-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.aiwf-list h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 0.5rem; }
+.aiwf-list--good h3 { color: var(--color-band-high); }
+.aiwf-list--work h3 { color: var(--color-gold); }
+.aiwf-list ul { margin: 0; padding-left: 1.1rem; }
+.aiwf-list li { font-size: 0.88rem; line-height: 1.5; color: var(--color-text); margin: 0.3rem 0; }
+
+/* ── Corrections ── */
+.aiwf-corrections h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin: 0 0 0.7rem; }
+.aiwf-corr { border-left: 3px solid var(--color-primary); padding: 0.1rem 0 0.1rem 0.85rem; margin-bottom: 0.9rem; }
+.aiwf-corr-from { font-size: 0.86rem; color: var(--color-text-muted); text-decoration: line-through; text-decoration-color: var(--color-band-low); margin: 0 0 0.2rem; }
+.aiwf-corr-to { font-size: 0.9rem; color: var(--color-text); font-weight: 500; margin: 0 0 0.2rem; }
+.aiwf-corr-why { font-size: 0.8rem; color: var(--color-text-muted); font-style: italic; margin: 0; }
+
+.aiwf-disclaimer { font-size: 0.76rem; color: var(--color-text-faint); margin: 0; padding-top: 0.4rem; border-top: 1px solid var(--color-border); }

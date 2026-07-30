@@ -155,3 +155,63 @@ describe('warnIfMisaligned — multiple missing fields', () => {
     expect(warn).not.toHaveBeenCalled()
   })
 })
+
+// ── Diagram/map groups missing image ───────────────────────────────────────────
+
+function makeRow(groups, published = true) {
+  return { test_label: 'Test 1', published, content: { sections: [{ id: 's1', groups }] } }
+}
+
+describe('warnIfMisaligned — diagram group missing mapImage/diagramImage', () => {
+  it('warns when a "Label the map" group has no mapImage or diagramImage', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const group = {
+      instructions: 'Label the map below. Write the correct letter, A–I, next to Questions 11–14.',
+      questions: [makeQuestion({ number: 11 }), makeQuestion({ number: 12 })],
+    }
+    warnIfMisaligned(makeRow([group]))
+    expect(warn).toHaveBeenCalledWith(expect.stringMatching(/map\/plan\/diagram.*Q11-12/))
+  })
+
+  it('does not warn when mapImage is set', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const group = {
+      instructions: 'Label the map below.',
+      mapImage: 'Part 2 Map.png',
+      questions: [makeQuestion({ number: 11 })],
+    }
+    warnIfMisaligned(makeRow([group]))
+    expect(warn).not.toHaveBeenCalledWith(expect.stringMatching(/map\/plan\/diagram/))
+  })
+
+  it('does not warn when diagramImage is set', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const group = {
+      instructions: 'Label the plan below.',
+      diagramImage: 'floor-plan.png',
+      questions: [makeQuestion({ number: 1 })],
+    }
+    warnIfMisaligned(makeRow([group]))
+    expect(warn).not.toHaveBeenCalledWith(expect.stringMatching(/map\/plan\/diagram/))
+  })
+
+  it('does not warn for groups with unrelated instructions', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const group = {
+      instructions: 'Choose the correct letter, A, B or C.',
+      questions: [makeQuestion({ number: 1 })],
+    }
+    warnIfMisaligned(makeRow([group]))
+    expect(warn).not.toHaveBeenCalledWith(expect.stringMatching(/map\/plan\/diagram/))
+  })
+
+  it('does not warn for diagram groups on unpublished tests', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const group = {
+      instructions: 'Label the diagram below.',
+      questions: [makeQuestion({ number: 1 })],
+    }
+    warnIfMisaligned(makeRow([group], false))
+    expect(warn).not.toHaveBeenCalled()
+  })
+})

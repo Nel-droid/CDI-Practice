@@ -1,7 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../context/AuthContext'
+import { useTargetBand } from '../../lib/useTargetBand'
+import { useExamPrefs } from '../../lib/useExamPrefs'
 import { mergeHighlightSpans } from '../../lib/highlighting/mergeHighlightSpans'
+import BandRule from '../../components/BandRule'
+import TypeAccuracyChart from '../../components/charts/TypeAccuracyChart'
 import './ReadingResults.css'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -270,8 +275,13 @@ function ReviewListPanel({ perQuestion, qMeta, sections, activePopoverNum, openP
 export default function ReadingResults() {
   const { attemptId } = useParams()
 
+  const { user } = useAuth()
+  const [target] = useTargetBand(user)
+  const prefs = useExamPrefs()
+
   const [attempt,        setAttempt]       = useState(null)
   const [test,           setTest]          = useState(null)
+  const [testMeta,       setTestMeta]      = useState({})
   const [loading,        setLoading]       = useState(true)
   const [error,          setError]         = useState('')
   const [mode,           setMode]          = useState('results')  // 'results' | 'review'
@@ -295,13 +305,13 @@ export default function ReadingResults() {
       if (e1 || !att) { setError('Result not found.'); setLoading(false); return }
       setAttempt(att)
 
-      if (att.test_id) {
-        const { data: t } = await supabase
-          .from('tests')
-          .select('content')
-          .eq('id', att.test_id)
-          .single()
-        if (t) setTest(t.content)
+      // Full content (with answers/explanations) is released only for the
+      // owner's own submitted attempt, via a SECURITY DEFINER RPC.
+      const { data: review } = await supabase
+        .rpc('get_review_content', { p_attempt_id: attemptId })
+      if (review) {
+        setTest(review.content)
+        setTestMeta({ book: review.book, label: review.test_label })
       }
 
       setLoading(false)
@@ -329,46 +339,81 @@ export default function ReadingResults() {
   // ── Results view ────────────────────────────────────────────────────────────
 
   if (mode === 'results') {
+    // Computed at submit time; older attempts predate it and simply omit the panel.
+    const byType = (marked.byType ?? [])
+      .map(r => ({ ...r, accuracy: r.total ? r.correct / r.total : 0 }))
+      .sort((a, b) => a.accuracy - b.accuracy || b.total - a.total)
+
     return (
       <div className="results-page">
-        <div className="results-summary-card">
-          <div className="results-heading">
-            <div>
-              <h1 className="results-title">Reading Results</h1>
-              <p className="results-test-name">
-                {test?.book ?? 'CDI Practice'} — {test?.testLabel ?? 'Test'}
-              </p>
-            </div>
-            <Link to="/reading" className="results-back-link">← New test</Link>
+        <header className="results-head">
+          <div>
+            <p className="results-kicker num">Reading · result</p>
+            <h1 className="results-title">
+              {testMeta.book ?? 'Academic Reading'}
+              {testMeta.label ? <span className="results-title-sep"> · {testMeta.label}</span> : null}
+            </h1>
+            <p className="results-when">
+              {attempt.submitted_at
+                ? new Date(attempt.submitted_at).toLocaleDateString('en-GB',
+                    { day: 'numeric', month: 'long', year: 'numeric' })
+                : ''}
+            </p>
           </div>
-
-          <div className="results-stats">
-            {attempt.band != null && (
-              <div className={`stat-band ${bandClass(attempt.band)}`}>
-                <span className="stat-value">{attempt.band}</span>
-                <span className="stat-label">Band</span>
-              </div>
-            )}
-            <div className="stat-box">
-              <span className="stat-value">{marked.raw ?? 0}/{marked.total ?? perQuestion.length}</span>
-              <span className="stat-label">Score</span>
-            </div>
-            <div className="stat-box">
-              <span className="stat-value">{fmtDuration(attempt.duration_seconds)}</span>
-              <span className="stat-label">Time taken</span>
-            </div>
-          </div>
-
-          <div className="results-actions">
+          <div className="results-head-actions">
             <Link to="/dashboard" className="btn btn-outline">Dashboard</Link>
-            <button
-              className="btn btn-primary"
-              onClick={() => { setMode('review'); setPopover(null); setReviewSection(0) }}
-            >
-              Review with feedback →
-            </button>
+            {sections.length > 0 && (
+              <button
+                className="btn btn-primary"
+                onClick={() => { setMode('review'); setPopover(null); setReviewSection(0) }}
+              >
+                Review with feedback →
+              </button>
+            )}
           </div>
-        </div>
+        </header>
+
+        {sections.length === 0 && (
+          <p className="results-review-note">
+            In-passage review isn’t available for this attempt — its test content has since
+            been updated. Your score and the correct answers are shown below.
+          </p>
+        )}
+
+        {/* ── The score, against the scale it is reported on ── */}
+        <section className="results-band-card" aria-label="Your band">
+          <div className="results-figures">
+            <div className="rfig rfig--band">
+              <span className="rfig-val num">{attempt.band ?? '—'}</span>
+              <span className="rfig-lbl">Band</span>
+            </div>
+            <div className="rfig">
+              <span className="rfig-val num">
+                {marked.raw ?? 0}<span className="rfig-of">/{marked.total ?? perQuestion.length}</span>
+              </span>
+              <span className="rfig-lbl">Correct</span>
+            </div>
+            <div className="rfig">
+              <span className="rfig-val num">{fmtDuration(attempt.duration_seconds)}</span>
+              <span className="rfig-lbl">Time taken</span>
+            </div>
+          </div>
+          {attempt.band != null && (
+            <BandRule current={attempt.band} target={target} size="sm" />
+          )}
+        </section>
+
+        {/* ── Where the marks went ── */}
+        {byType.length > 0 && (
+          <section className="results-panel" aria-labelledby="rt-h">
+            <h2 id="rt-h" className="results-section-title">Where the marks went</h2>
+            <TypeAccuracyChart
+              rows={byType}
+              limit={12}
+              caption="Accuracy in this test, weakest task type first."
+            />
+          </section>
+        )}
 
         <div className="results-table-wrap">
           <h2 className="results-section-title">Per-question breakdown</h2>
@@ -432,12 +477,16 @@ export default function ReadingResults() {
           ← Back to results
         </button>
         <span className="review-toolbar-title">In-passage review</span>
+        <div className="review-textsize" role="group" aria-label="Text size">
+          <button className="review-textsize-btn" onClick={prefs.smallerText} disabled={!prefs.canShrink} aria-label="Decrease text size">A&minus;</button>
+          <button className="review-textsize-btn" onClick={prefs.biggerText} disabled={!prefs.canGrow} aria-label="Increase text size">A+</button>
+        </div>
         <span className="review-toolbar-score">
           {marked.raw ?? 0} / {marked.total ?? perQuestion.length} correct
         </span>
       </div>
 
-      <div className="review-body">
+      <div className="review-body" style={{ zoom: prefs.scale }}>
         <PassagePanelReview
           sections={sections}
           activeSection={reviewSection}

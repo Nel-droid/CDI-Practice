@@ -1,0 +1,18 @@
+.wft-section-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border-blue);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.wft-section-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--color-border-blue);
+}
