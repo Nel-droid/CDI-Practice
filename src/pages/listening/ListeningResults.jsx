@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { mergeHighlightSpans } from '../../lib/highlighting/mergeHighlightSpans'
+import { useExamPrefs } from '../../lib/useExamPrefs'
 import './ListeningResults.css'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -147,7 +148,7 @@ function renderWithHighlights(text, items, openPopover) {
 
 // ── Transcript panel (left column) ───────────────────────────────────────────
 
-function TranscriptPanel({ sections, activeSection, onSectionChange, evidenceByEntry, openPopover, audioUrls }) {
+function TranscriptPanel({ sections, activeSection, onSectionChange, evidenceByEntry, openPopover, audioUrls, fullAudioUrl }) {
   const sec = sections[activeSection]
   return (
     <div className="review-passage-col">
@@ -168,7 +169,7 @@ function TranscriptPanel({ sections, activeSection, onSectionChange, evidenceByE
         <div className="review-passage-inner">
           <h2 className="review-passage-title">{sec.title}</h2>
 
-          {audioUrls[sec.id] && (
+          {audioUrls[sec.id] ? (
             <audio
               key={sec.id}
               className="review-audio"
@@ -177,7 +178,15 @@ function TranscriptPanel({ sections, activeSection, onSectionChange, evidenceByE
               preload="none"
               aria-label={`${sec.title} audio`}
             />
-          )}
+          ) : fullAudioUrl ? (
+            <audio
+              className="review-audio"
+              src={fullAudioUrl}
+              controls
+              preload="none"
+              aria-label="Full recording"
+            />
+          ) : null}
 
           {sec.transcript?.map(entry => {
             const key = `${sec.id}:${entry.id}`
@@ -253,6 +262,8 @@ export default function ListeningResults() {
   const [reviewSection,  setReviewSection] = useState(0)
   const [popover,        setPopover]       = useState(null)
   const [audioUrls,      setAudioUrls]     = useState({})
+  const [fullAudioUrl,   setFullAudioUrl]  = useState(null)
+  const prefs = useExamPrefs()
 
   const closePopover = useCallback(() => setPopover(null), [])
 
@@ -278,7 +289,7 @@ export default function ListeningResults() {
         if (review?.content) {
           const t = { content: review.content }
           setTest(t.content)
-          // Pre-fetch signed audio URLs for all 4 parts (used in review)
+          // Per-part audio (older tests with per-section transcripts)
           const urls = {}
           for (const sec of t.content.sections ?? []) {
             if (sec.audioPath) {
@@ -289,6 +300,13 @@ export default function ListeningResults() {
             }
           }
           setAudioUrls(urls)
+          // Single merged recording (newer tests) — replayable in review
+          if (t.content.audioPath) {
+            const { data: full } = await supabase.storage
+              .from('listening-audio')
+              .createSignedUrl(t.content.audioPath, 3600)
+            if (full?.signedUrl) setFullAudioUrl(full.signedUrl)
+          }
         }
       }
       setLoading(false)
@@ -315,6 +333,7 @@ export default function ListeningResults() {
   const total    = marked.total ?? 40
   const band     = marked.band  ?? attempt.band
   const sections = test?.sections ?? []
+  const hasTranscript = sections.some(s => Array.isArray(s.transcript) && s.transcript.length > 0)
 
   const correctCount   = perQ.filter(q => q.correct).length
   const incorrectCount = perQ.filter(q => !q.correct).length
@@ -388,7 +407,7 @@ export default function ListeningResults() {
               className="btn btn-primary"
               onClick={() => { setMode('review'); setPopover(null); setReviewSection(0) }}
             >
-              Review with transcript →
+              {hasTranscript ? 'Review with transcript →' : 'Review answers →'}
             </button>
           )}
         </div>
@@ -421,26 +440,52 @@ export default function ListeningResults() {
         >
           ← Back to results
         </button>
-        <span className="review-toolbar-title">Transcript review</span>
+        <span className="review-toolbar-title">{hasTranscript ? 'Transcript review' : 'Answer review'}</span>
+        <div className="review-textsize" role="group" aria-label="Text size">
+          <button className="review-textsize-btn" onClick={prefs.smallerText} disabled={!prefs.canShrink} aria-label="Decrease text size">A&minus;</button>
+          <button className="review-textsize-btn" onClick={prefs.biggerText} disabled={!prefs.canGrow} aria-label="Increase text size">A+</button>
+        </div>
         <span className="review-toolbar-score">{raw} / {total} correct</span>
       </div>
 
-      <div className="review-body">
-        <TranscriptPanel
-          sections={sections}
-          activeSection={reviewSection}
-          onSectionChange={i => { setReviewSection(i); setPopover(null) }}
-          evidenceByEntry={evidenceByEntry}
-          openPopover={openPopover}
-          audioUrls={audioUrls}
-        />
-        <ReviewListPanel
-          perQuestion={perQ}
-          qMeta={qMeta}
-          sections={sections}
-          activePopoverNum={activePopoverNum}
-          openPopover={openPopover}
-        />
+      <div className="review-body" style={{ zoom: prefs.scale }}>
+        {hasTranscript ? (
+          <>
+            <TranscriptPanel
+              sections={sections}
+              activeSection={reviewSection}
+              onSectionChange={i => { setReviewSection(i); setPopover(null) }}
+              evidenceByEntry={evidenceByEntry}
+              openPopover={openPopover}
+              audioUrls={audioUrls}
+              fullAudioUrl={fullAudioUrl}
+            />
+            <ReviewListPanel
+              perQuestion={perQ}
+              qMeta={qMeta}
+              sections={sections}
+              activePopoverNum={activePopoverNum}
+              openPopover={openPopover}
+            />
+          </>
+        ) : (
+          <div className="review-single">
+            {fullAudioUrl && (
+              <div className="review-audio-card">
+                <h2 className="review-audio-title">Recording</h2>
+                <audio className="review-audio" src={fullAudioUrl} controls preload="none" aria-label="Full recording" />
+                <p className="review-audio-note">Replay any part of the recording while you check your answers. Tap ⓘ on a question for the correct answer and explanation.</p>
+              </div>
+            )}
+            <ReviewListPanel
+              perQuestion={perQ}
+              qMeta={qMeta}
+              sections={sections}
+              activePopoverNum={activePopoverNum}
+              openPopover={openPopover}
+            />
+          </div>
+        )}
       </div>
 
       {popover && (

@@ -11,6 +11,9 @@
  * @param {Array<{pq:{number,correct}, meta:{evidence:{quote}}}>} items
  * @returns {Array<{start:number, end:number, items:Array}>}
  */
+// A character that is part of a word (so a highlight never ends mid-word).
+const WORD_CHAR = /[A-Za-z0-9'’\-]/
+
 export function mergeHighlightSpans(text, items) {
   const spans = []
   for (const item of items) {
@@ -18,7 +21,14 @@ export function mergeHighlightSpans(text, items) {
     if (!quote) continue
     const idx = text.toLowerCase().indexOf(quote.toLowerCase())
     if (idx === -1) continue
-    spans.push({ start: idx, end: idx + quote.length, item })
+    // Snap the span to word boundaries so a quote that was truncated mid-word
+    // (e.g. a fixed-length evidence snippet) doesn't split a word or drop the
+    // [N] marker in the middle of one.
+    let start = idx
+    while (start > 0 && WORD_CHAR.test(text[start - 1])) start--
+    let end = idx + quote.length
+    while (end < text.length && WORD_CHAR.test(text[end])) end++
+    spans.push({ start, end, item })
   }
 
   if (spans.length === 0) return []

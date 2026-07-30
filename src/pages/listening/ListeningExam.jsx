@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { submitExam } from '../../lib/examApi'
+import { useExamPrefs } from '../../lib/useExamPrefs'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { HighlightBar } from '../../components/HighlightToolbar'
 import { useHighlight } from '../../lib/useHighlight'
@@ -539,6 +540,7 @@ export default function ListeningExam() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
+  const prefs = useExamPrefs()
   const [showExitConfirm, setShowExitConfirm] = useState(false)
 
   // Audio state — one continuous recording per test (all four parts), matching
@@ -797,13 +799,20 @@ export default function ListeningExam() {
             </button>
           ))}
         </nav>
+
+        <div className="exam-textsize" role="group" aria-label="Text size">
+          <span className="exam-textsize-lbl">Text size</span>
+          <button className="textsize-btn" onClick={prefs.smallerText} disabled={!prefs.canShrink} aria-label="Decrease text size">A&minus;</button>
+          <button className="textsize-btn" onClick={prefs.biggerText} disabled={!prefs.canGrow} aria-label="Increase text size">A+</button>
+        </div>
       </div>
       <div className="exam-progress-strip" aria-hidden="true">
         <div className="exam-progress-strip-fill" style={{ width: `${questions.length ? (answeredCount / questions.length) * 100 : 0}%` }} />
       </div>
 
       {/* ── Body — questions only; the recording is the audio bar above ── */}
-      <div className="exam-body exam-body--single" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}>
+      <div className="exam-body exam-body--single" onMouseUp={onMouseUp} onTouchEnd={onTouchEnd}
+        style={{ '--reading-scale': prefs.scale }}>
         <div className="exam-questions-col">
           <QuestionsPanel
             section={currentSection}

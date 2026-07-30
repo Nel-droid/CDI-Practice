@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
 import { useTargetBand } from '../../lib/useTargetBand'
+import { useExamPrefs } from '../../lib/useExamPrefs'
 import { mergeHighlightSpans } from '../../lib/highlighting/mergeHighlightSpans'
 import BandRule from '../../components/BandRule'
 import TypeAccuracyChart from '../../components/charts/TypeAccuracyChart'
@@ -276,6 +277,7 @@ export default function ReadingResults() {
 
   const { user } = useAuth()
   const [target] = useTargetBand(user)
+  const prefs = useExamPrefs()
 
   const [attempt,        setAttempt]       = useState(null)
   const [test,           setTest]          = useState(null)
@@ -466,12 +468,16 @@ export default function ReadingResults() {
           ← Back to results
         </button>
         <span className="review-toolbar-title">In-passage review</span>
+        <div className="review-textsize" role="group" aria-label="Text size">
+          <button className="review-textsize-btn" onClick={prefs.smallerText} disabled={!prefs.canShrink} aria-label="Decrease text size">A&minus;</button>
+          <button className="review-textsize-btn" onClick={prefs.biggerText} disabled={!prefs.canGrow} aria-label="Increase text size">A+</button>
+        </div>
         <span className="review-toolbar-score">
           {marked.raw ?? 0} / {marked.total ?? perQuestion.length} correct
         </span>
       </div>
 
-      <div className="review-body">
+      <div className="review-body" style={{ zoom: prefs.scale }}>
         <PassagePanelReview
           sections={sections}
           activeSection={reviewSection}
