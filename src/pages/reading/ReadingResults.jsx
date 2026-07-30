@@ -362,14 +362,23 @@ export default function ReadingResults() {
           </div>
           <div className="results-head-actions">
             <Link to="/dashboard" className="btn btn-outline">Dashboard</Link>
-            <button
-              className="btn btn-primary"
-              onClick={() => { setMode('review'); setPopover(null); setReviewSection(0) }}
-            >
-              Review with feedback →
-            </button>
+            {sections.length > 0 && (
+              <button
+                className="btn btn-primary"
+                onClick={() => { setMode('review'); setPopover(null); setReviewSection(0) }}
+              >
+                Review with feedback →
+              </button>
+            )}
           </div>
         </header>
+
+        {sections.length === 0 && (
+          <p className="results-review-note">
+            In-passage review isn’t available for this attempt — its test content has since
+            been updated. Your score and the correct answers are shown below.
+          </p>
+        )}
 
         {/* ── The score, against the scale it is reported on ── */}
         <section className="results-band-card" aria-label="Your band">

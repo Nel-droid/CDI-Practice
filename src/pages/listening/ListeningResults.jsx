@@ -398,6 +398,13 @@ export default function ListeningResults() {
           </div>
         )}
 
+        {perQ.length > 0 && sections.length === 0 && (
+          <p className="results-review-note">
+            Transcript review isn’t available for this attempt — its test content has since
+            been updated. Your score and the correct answers are shown above.
+          </p>
+        )}
+
         <div className="lr-actions">
           <button className="btn btn-outline" onClick={() => navigate('/listening')}>
             ← Back to Listening
