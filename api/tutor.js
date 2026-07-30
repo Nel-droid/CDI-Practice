@@ -1,6 +1,7 @@
 import { generate, AiError } from './_lib/gemini.js'
 import { tutorSystem } from './_lib/prompts.js'
-import { readJson, sendJson } from './_lib/http.js'
+import { readJson, sendJson, HttpError } from './_lib/http.js'
+import { requireUser, enforceDailyLimit } from './_lib/supabase.js'
 
 const MAX_TURNS = 16       // keep the context small on the free tier
 const MAX_CHARS = 4000     // per message guard
@@ -9,6 +10,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return sendJson(res, 405, { error: 'Method not allowed' })
 
   try {
+    const { user, supa } = await requireUser(req)
+    await enforceDailyLimit(supa, user.id)
+
     const { messages, context } = await readJson(req)
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -36,7 +40,7 @@ export default async function handler(req, res) {
 
     return sendJson(res, 200, { reply })
   } catch (err) {
-    const status = err instanceof AiError ? err.status : 500
+    const status = err instanceof AiError || err instanceof HttpError ? err.status : 500
     return sendJson(res, status, { error: err.message || 'Something went wrong.' })
   }
 }

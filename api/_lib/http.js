@@ -19,3 +19,12 @@ export function sendJson(res, status, payload) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8')
   res.end(JSON.stringify(payload))
 }
+
+// Error carrying an HTTP status, so handlers can `throw` and map to a response.
+export class HttpError extends Error {
+  constructor(message, status = 500) {
+    super(message)
+    this.name = 'HttpError'
+    this.status = status
+  }
+}

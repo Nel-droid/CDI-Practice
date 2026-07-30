@@ -33,7 +33,7 @@ export default function ListeningHome() {
 
   useEffect(() => {
     let query = supabase
-      .from('tests')
+      .from('tests_public')
       .select('id, skill, book, test_label, variant, duration_seconds, content, published')
       .eq('skill', 'listening')
       .order('book')

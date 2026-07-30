@@ -303,16 +303,13 @@ export default function ReadingResults() {
       if (e1 || !att) { setError('Result not found.'); setLoading(false); return }
       setAttempt(att)
 
-      if (att.test_id) {
-        const { data: t } = await supabase
-          .from('tests')
-          .select('content, book, test_label')
-          .eq('id', att.test_id)
-          .single()
-        if (t) {
-          setTest(t.content)
-          setTestMeta({ book: t.book, label: t.test_label })
-        }
+      // Full content (with answers/explanations) is released only for the
+      // owner's own submitted attempt, via a SECURITY DEFINER RPC.
+      const { data: review } = await supabase
+        .rpc('get_review_content', { p_attempt_id: attemptId })
+      if (review) {
+        setTest(review.content)
+        setTestMeta({ book: review.book, label: review.test_label })
       }
 
       setLoading(false)

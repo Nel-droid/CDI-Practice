@@ -30,9 +30,15 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   process.env.GEMINI_API_KEY = process.env.GEMINI_API_KEY || env.GEMINI_API_KEY || ''
   process.env.GEMINI_MODEL = process.env.GEMINI_MODEL || env.GEMINI_MODEL || ''
+  // Server-side Supabase creds for the dev /api handlers (auth + grading).
+  process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_SERVICE_ROLE_KEY || ''
+  process.env.SUPABASE_URL = process.env.SUPABASE_URL || env.SUPABASE_URL || env.VITE_SUPABASE_URL || ''
 
   return {
     plugins: [react(), devApiPlugin()],
+    server: {
+      allowedHosts: ['cranial-shack-unsliced.ngrok-free.dev'],
+    },
     test: {
       environment: 'node',
       include: ['src/**/*.test.js', 'src/**/*.test.jsx'],

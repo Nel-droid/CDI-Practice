@@ -1,6 +1,7 @@
 import { generate, AiError } from './_lib/gemini.js'
 import { writingFeedbackSystem, writingFeedbackUser } from './_lib/prompts.js'
-import { readJson, sendJson } from './_lib/http.js'
+import { readJson, sendJson, HttpError } from './_lib/http.js'
+import { requireUser, enforceDailyLimit } from './_lib/supabase.js'
 
 // Tolerant JSON parse: the model may wrap the object in ```json fences or
 // prepend reasoning text, so fall back to extracting the outermost {...}.
@@ -43,6 +44,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return sendJson(res, 405, { error: 'Method not allowed' })
 
   try {
+    const { user, supa } = await requireUser(req)
+    await enforceDailyLimit(supa, user.id)
+
     const { task, promptText, essay, minWords } = await readJson(req)
 
     if (task !== 'task1' && task !== 'task2') {
@@ -68,7 +72,7 @@ export default async function handler(req, res) {
     normaliseBands(feedback)
     return sendJson(res, 200, { feedback })
   } catch (err) {
-    const status = err instanceof AiError ? err.status : 500
+    const status = err instanceof AiError || err instanceof HttpError ? err.status : 500
     return sendJson(res, status, { error: err.message || 'Something went wrong.' })
   }
 }

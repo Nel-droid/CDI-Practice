@@ -270,13 +270,13 @@ export default function ListeningResults() {
       if (e1 || !att) { setLoadError('Results not found.'); setLoading(false); return }
       setAttempt(att)
 
-      if (att.test_id) {
-        const { data: t } = await supabase
-          .from('tests')
-          .select('content')
-          .eq('id', att.test_id)
-          .single()
-        if (t?.content) {
+      // Full content (with transcript/answers) is released only for the owner's
+      // own submitted attempt, via a SECURITY DEFINER RPC.
+      {
+        const { data: review } = await supabase
+          .rpc('get_review_content', { p_attempt_id: attemptId })
+        if (review?.content) {
+          const t = { content: review.content }
           setTest(t.content)
           // Pre-fetch signed audio URLs for all 4 parts (used in review)
           const urls = {}

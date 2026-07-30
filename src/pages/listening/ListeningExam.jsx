@@ -2,9 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { scoreModule } from '../../lib/marking/index'
-import { warnIfMisaligned } from '../../lib/marking/validateTest'
-import { summariseByType } from '../../lib/analytics/questionTypes'
+import { submitExam } from '../../lib/examApi'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { HighlightBar } from '../../components/HighlightToolbar'
 import { useHighlight } from '../../lib/useHighlight'
@@ -539,6 +537,7 @@ export default function ListeningExam() {
   const [activeQuestion, setActiveQuestion] = useState(1)
   const [timeLeft, setTimeLeft] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
   const [showExitConfirm, setShowExitConfirm] = useState(false)
 
@@ -560,7 +559,7 @@ export default function ListeningExam() {
   // ── Load test ──────────────────────────────────────────────────────────
   useEffect(() => {
     supabase
-      .from('tests')
+      .from('tests_public')
       .select('content, duration_seconds, published, test_label')
       .eq('id', testId)
       .single()
@@ -570,7 +569,6 @@ export default function ListeningExam() {
         setTestLabel(data.test_label ?? '')
         setTimeLeft(data.duration_seconds)
         startedAtRef.current = Date.now()
-        warnIfMisaligned(data)
       })
   }, [testId])
 
@@ -654,43 +652,26 @@ export default function ListeningExam() {
   }
 
   // ── Submit ─────────────────────────────────────────────────────────────
+  // Grading happens server-side (api/grade) so the answer key never reaches
+  // the browser during the exam.
   const submitRef = useRef(null)
   const handleSubmit = useCallback(async () => {
     if (submittedRef.current || !test) return
     submittedRef.current = true
     setSubmitting(true)
-    setShowConfirm(false)
+    setSubmitError('')
 
-    const result = scoreModule(test, responses)
-    const elapsed = Math.round((Date.now() - startedAtRef.current) / 1000)
-
-    await supabase.from('attempts').update({
-      submitted_at: new Date().toISOString(),
-      duration_seconds: elapsed,
-      raw_score: result.raw,
-      band: result.band,
-      responses,
-      marked: {
-        raw: result.raw,
-        total: result.total,
-        band: result.band,
-        perQuestion: result.perQuestion,
-        // Recorded now, while the test content is in hand, so the dashboard can
-        // explain which task types cost marks without re-fetching whole tests.
-        byType: summariseByType(test, result.perQuestion),
-      },
-    }).eq('id', attemptId)
-
-    supabase
-      .from('profiles')
-      .update({ last_active_at: new Date().toISOString() })
-      .eq('id', user.id)
-      .then(({ error }) => {
-        if (error) console.warn('last_active_at update skipped:', error.message)
-      })
+    try {
+      await submitExam({ attemptId, responses })
+    } catch (err) {
+      submittedRef.current = false
+      setSubmitting(false)
+      setSubmitError(err.message || 'Could not submit. Please try again.')
+      return
+    }
 
     navigate(`/listening/results/${attemptId}`)
-  }, [test, responses, attemptId, user, navigate])
+  }, [test, responses, attemptId, navigate])
 
   useEffect(() => { submitRef.current = handleSubmit }, [handleSubmit])
 
@@ -920,12 +901,28 @@ export default function ListeningExam() {
               )}
               <br />You cannot change your answers after submitting.
             </p>
+            {submitError && <p className="exam-submit-error" role="alert">{submitError}</p>}
             <div className="modal-actions">
-              <button className="btn btn-outline" onClick={() => setShowConfirm(false)} autoFocus>
+              <button className="btn btn-outline" onClick={() => setShowConfirm(false)} disabled={submitting} autoFocus>
                 Go back
               </button>
               <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
-                {submitting ? 'Submitting…' : 'Yes, submit'}
+                {submitting ? 'Submitting…' : submitError ? 'Try again' : 'Yes, submit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Auto-submit failure (timer expired, no modal open) ── */}
+      {submitError && !showConfirm && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-box">
+            <h2 className="modal-title">Submission failed</h2>
+            <p className="modal-body">{submitError}</p>
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? 'Submitting…' : 'Retry submit'}
               </button>
             </div>
           </div>
