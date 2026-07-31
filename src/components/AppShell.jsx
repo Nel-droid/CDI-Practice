@@ -5,6 +5,7 @@ import { Logo } from './Logo'
 import { Avatar, DEFAULT_AVATAR_COLOR } from './Avatar'
 import { TutorWidget } from './ai/TutorWidget'
 import { BackgroundLayer } from './BackgroundLayer'
+import { TelegramLink } from './TelegramLink'
 import './AppShell.css'
 
 export default function AppShell() {
@@ -72,6 +73,10 @@ export default function AppShell() {
           <Outlet />
         </div>
       </main>
+      <footer className="shell-foot">
+        <p className="shell-foot-note">CDI Practice — built for focused IELTS practice.</p>
+        <TelegramLink />
+      </footer>
       <TutorWidget />
     </div>
   )

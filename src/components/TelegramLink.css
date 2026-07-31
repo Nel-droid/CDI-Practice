@@ -1,0 +1,23 @@
+.tg-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.82;
+  transition: opacity 0.14s ease, color 0.14s ease;
+}
+.tg-link:hover,
+.tg-link:focus-visible {
+  opacity: 1;
+  color: #229ed9; /* Telegram blue — legible on both light and dark grounds */
+}
+.tg-link-icon {
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-link { transition: none; }
+}

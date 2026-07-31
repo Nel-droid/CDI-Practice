@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { ThemeToggle } from '../components/ThemeToggle'
 import { Logo } from '../components/Logo'
+import { TelegramLink } from '../components/TelegramLink'
 import './Landing.css'
 
 const LOGO_HOLD = 3400   // ms animation plays before fade
@@ -239,6 +240,7 @@ export default function Landing() {
             <span>CDI Practice</span>
           </div>
           <p>Authentic IELTS practice material — real exam conditions, real results.</p>
+          <TelegramLink className="l-foot-tg" />
         </footer>
       </div>
     </div>

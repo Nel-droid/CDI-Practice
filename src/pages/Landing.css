@@ -715,6 +715,16 @@
   color: rgba(255, 255, 255, 0.42);
 }
 
+.l-foot .tg-link {
+  margin-top: 0.15rem;
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+.l-foot .tg-link:hover,
+.l-foot .tg-link:focus-visible {
+  color: #6cc8f5; /* lighter Telegram blue for contrast on the dark footer */
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════════════════════════════════════════ */
