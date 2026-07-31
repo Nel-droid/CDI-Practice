@@ -99,6 +99,24 @@
   border-bottom-left-radius: 4px;
 }
 
+/* ── Rendered Markdown (assistant messages) ── */
+.tutor-md { white-space: normal; }
+.tutor-md > :first-child { margin-top: 0; }
+.tutor-md > :last-child { margin-bottom: 0; }
+.tutor-md p { margin: 0 0 0.55rem; }
+.tutor-md .md-h { margin: 0.7rem 0 0.35rem; font-weight: 700; }
+.tutor-md ul,
+.tutor-md ol { margin: 0.3rem 0 0.6rem; padding-left: 1.25rem; }
+.tutor-md li { margin: 0.15rem 0; }
+.tutor-md strong { font-weight: 700; }
+.tutor-md code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
 .tutor-typing { display: inline-flex; gap: 4px; align-items: center; }
 .tutor-typing span {
   width: 6px; height: 6px; border-radius: 50%;

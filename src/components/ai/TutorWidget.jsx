@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { askTutor } from '../../lib/ai/aiClient'
+import { Markdown } from './Markdown'
 import './TutorWidget.css'
 
 // Turn the current route into a short hint so the tutor knows where the
@@ -95,7 +96,9 @@ export function TutorWidget() {
           <div className="tutor-messages" ref={scrollRef}>
             {messages.map((m, i) => (
               <div key={i} className={'tutor-msg tutor-msg--' + m.role}>
-                <div className="tutor-bubble">{m.content}</div>
+                <div className={'tutor-bubble' + (m.role === 'assistant' ? ' tutor-md' : '')}>
+                  {m.role === 'assistant' ? <Markdown text={m.content} /> : m.content}
+                </div>
               </div>
             ))}
             {busy && (
