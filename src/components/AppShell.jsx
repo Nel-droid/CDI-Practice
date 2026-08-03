@@ -56,6 +56,12 @@ export default function AppShell() {
             Writing
           </NavLink>
           <span className="nav-divider" aria-hidden="true" />
+          <NavLink
+            to="/pricing"
+            className={({ isActive }) => 'nav-link nav-link--plans' + (isActive ? ' active' : '')}
+          >
+            Plans
+          </NavLink>
           <ThemeToggle />
           <NavLink
             to="/settings"

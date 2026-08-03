@@ -31,3 +31,25 @@ export async function postJsonAuthed(url, body) {
   }
   return data2
 }
+
+/** GET one of our /api routes with the Supabase access token attached. */
+export async function getJsonAuthed(url) {
+  const { data } = await supabase.auth.getSession()
+  const token = data?.session?.access_token
+
+  const headers = {}
+  if (token) headers.Authorization = `Bearer ${token}`
+
+  let res
+  try {
+    res = await fetch(url, { headers })
+  } catch {
+    throw new Error('Could not reach the server. Check your connection and try again.')
+  }
+
+  let body = {}
+  try { body = await res.json() } catch { /* no JSON body */ }
+
+  if (!res.ok) throw new Error(body.error || `Request failed (${res.status}).`)
+  return body
+}

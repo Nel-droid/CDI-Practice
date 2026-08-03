@@ -9,6 +9,7 @@ import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Study from './pages/Study'
 import Settings from './pages/Settings'
+import Pricing from './pages/Pricing'
 import WritingHome            from './pages/writing/WritingHome'
 import WritingTask1Exam       from './pages/writing/WritingTask1Exam'
 import WritingTask1Results    from './pages/writing/WritingTask1Results'
@@ -68,6 +69,10 @@ export default function App() {
           <Route
             path="/settings"
             element={<ProtectedRoute><Settings /></ProtectedRoute>}
+          />
+          <Route
+            path="/pricing"
+            element={<ProtectedRoute><Pricing /></ProtectedRoute>}
           />
           <Route
             path="/reading"
