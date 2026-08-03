@@ -1,7 +1,8 @@
 import { generate, AiError } from './_lib/gemini.js'
 import { tutorSystem } from './_lib/prompts.js'
 import { readJson, sendJson, HttpError } from './_lib/http.js'
-import { requireUser, enforceDailyLimit } from './_lib/supabase.js'
+import { requireUser } from './_lib/supabase.js'
+import { assertQuota, recordUsage } from './_lib/entitlements.js'
 
 const MAX_TURNS = 16       // keep the context small on the free tier
 const MAX_CHARS = 4000     // per message guard
@@ -11,7 +12,7 @@ export default async function handler(req, res) {
 
   try {
     const { user, supa } = await requireUser(req)
-    await enforceDailyLimit(supa, user.id)
+    await assertQuota(supa, user.id, 'tutor')
 
     const { messages, context } = await readJson(req)
 
@@ -38,6 +39,7 @@ export default async function handler(req, res) {
       maxTokens: 900,
     })
 
+    await recordUsage(supa, user.id, 'tutor')
     return sendJson(res, 200, { reply })
   } catch (err) {
     const status = err instanceof AiError || err instanceof HttpError ? err.status : 500

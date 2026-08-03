@@ -41,30 +41,4 @@ export async function requireUser(req) {
   return { user: data.user, supa }
 }
 
-/**
- * Soft per-user daily cap. Throws HttpError(429) when the user is over the
- * limit; fails OPEN on any storage error so a counter problem never blocks a
- * legitimate user. Requires the api_usage table (supabase/phase13-secure-answers.sql).
- */
-export async function enforceDailyLimit(supa, userId, limit = 120) {
-  try {
-    const day = new Date().toISOString().slice(0, 10)
-    const { data } = await supa
-      .from('api_usage')
-      .select('count')
-      .eq('user_id', userId)
-      .eq('day', day)
-      .maybeSingle()
-
-    const used = data?.count ?? 0
-    if (used >= limit) {
-      throw new HttpError('You have reached today’s usage limit. Please try again tomorrow.', 429)
-    }
-    await supa
-      .from('api_usage')
-      .upsert({ user_id: userId, day, count: used + 1 }, { onConflict: 'user_id,day' })
-  } catch (err) {
-    if (err instanceof HttpError) throw err // real 429 — propagate
-    // otherwise fail open (table missing, transient error, etc.)
-  }
-}
+// Per-user AI quotas now live in ./entitlements.js (tier-aware, per-feature).
