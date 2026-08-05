@@ -29,6 +29,22 @@
 .aiwf-error { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-start; }
 .aiwf-error p { color: var(--color-error); font-size: 0.9rem; margin: 0; }
 
+.aiwf-quota { font-size: 0.8rem; color: var(--color-text-muted); margin: 0.5rem 0 0; }
+.aiwf-quota a { color: var(--color-primary); font-weight: 600; }
+
+.aiwf-quota-block {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.9rem 1rem;
+  background: var(--color-gold-light);
+  border: 1px solid color-mix(in srgb, var(--color-gold) 30%, transparent);
+  border-radius: var(--radius);
+}
+.aiwf-quota-block p { margin: 0; font-size: 0.9rem; color: var(--color-text); }
+
 /* ── Result ── */
 .aiwf-result { margin-top: 1.35rem; display: flex; flex-direction: column; gap: 1.4rem; }
 

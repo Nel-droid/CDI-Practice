@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import { askTutor } from '../../lib/ai/aiClient'
+import { useUsage } from '../../lib/useUsage'
 import { Markdown } from './Markdown'
 import './TutorWidget.css'
 
@@ -33,6 +34,8 @@ export function TutorWidget() {
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [quotaHit, setQuotaHit] = useState(false)
+  const { usage, refresh: refreshUsage } = useUsage()
   const scrollRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -60,9 +63,15 @@ export function TutorWidget() {
         context: contextForPath(location.pathname),
       })
       setMessages([...next, { role: 'assistant', content: reply }])
+      refreshUsage()
     } catch (e) {
-      setError(e.message)
+      if (e.code === 'quota_exceeded' || e.status === 402) {
+        setQuotaHit(true)
+      } else {
+        setError(e.message)
+      }
       setMessages(next) // keep the user's message; let them retry
+      refreshUsage()
     } finally {
       setBusy(false)
     }
@@ -117,6 +126,30 @@ export function TutorWidget() {
             </div>
           )}
 
+          {(() => {
+            const t = usage?.tutor
+            const out = quotaHit || (t && t.used >= t.limit)
+            if (out) {
+              return (
+                <div className="tutor-quota tutor-quota--out">
+                  <span>You've used today's {t?.limit ?? ''} tutor messages.</span>
+                  <Link to="/pricing" onClick={() => setOpen(false)}>See plans →</Link>
+                </div>
+              )
+            }
+            if (t) {
+              return (
+                <p className="tutor-quota">
+                  {Math.max(0, t.limit - t.used)} of {t.limit} left today
+                  {usage.tier === 'free' && (
+                    <> · <Link to="/pricing" onClick={() => setOpen(false)}>Upgrade</Link></>
+                  )}
+                </p>
+              )
+            }
+            return null
+          })()}
+
           <div className="tutor-inputbar">
             <textarea
               ref={inputRef}
@@ -126,9 +159,9 @@ export function TutorWidget() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="Ask about a question, a word, grammar…"
-              disabled={busy}
+              disabled={busy || quotaHit}
             />
-            <button className="tutor-send" onClick={() => send()} disabled={busy || !input.trim()} aria-label="Send">
+            <button className="tutor-send" onClick={() => send()} disabled={busy || quotaHit || !input.trim()} aria-label="Send">
               ↑
             </button>
           </div>

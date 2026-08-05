@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { getWritingFeedback } from '../../lib/ai/aiClient'
+import { useUsage } from '../../lib/useUsage'
 import './WritingFeedback.css'
 
 function bandClass(band) {
@@ -16,9 +18,13 @@ function bandClass(band) {
  * a few concrete corrections.
  */
 export function WritingFeedback({ task, promptText, essay, minWords, onResult }) {
-  const [state, setState] = useState('idle') // idle | loading | done | error
+  const [state, setState] = useState('idle') // idle | loading | done | error | quota
   const [feedback, setFeedback] = useState(null)
   const [error, setError] = useState('')
+  const { usage, refresh: refreshUsage } = useUsage()
+
+  const w = usage?.writing
+  const outOfChecks = w && w.used >= w.limit
 
   async function run() {
     setState('loading'); setError('')
@@ -27,9 +33,11 @@ export function WritingFeedback({ task, promptText, essay, minWords, onResult })
       setFeedback(fb)
       setState('done')
       onResult?.(fb)
+      refreshUsage()
     } catch (e) {
       setError(e.message)
-      setState('error')
+      setState(e.code === 'quota_exceeded' || e.status === 402 ? 'quota' : 'error')
+      refreshUsage()
     }
   }
 
@@ -39,11 +47,22 @@ export function WritingFeedback({ task, promptText, essay, minWords, onResult })
         <div>
           <h2 className="aiwf-title">AI feedback</h2>
           <p className="aiwf-sub">An examiner-style practice assessment against the four IELTS criteria.</p>
+          {state !== 'done' && w && !outOfChecks && (
+            <p className="aiwf-quota">
+              {Math.max(0, w.limit - w.used)} of {w.limit}{' '}
+              {w.period === 'lifetime' ? 'free writing checks left' : 'writing checks left today'}
+              {usage.tier === 'free' && <> · <Link to="/pricing">Upgrade for more</Link></>}
+            </p>
+          )}
         </div>
         {state !== 'done' && (
-          <button className="btn btn-primary aiwf-run" onClick={run} disabled={state === 'loading'}>
-            {state === 'loading' ? 'Assessing…' : 'Get AI feedback'}
-          </button>
+          outOfChecks ? (
+            <Link to="/pricing" className="btn btn-primary aiwf-run">See plans</Link>
+          ) : (
+            <button className="btn btn-primary aiwf-run" onClick={run} disabled={state === 'loading'}>
+              {state === 'loading' ? 'Assessing…' : 'Get AI feedback'}
+            </button>
+          )
         )}
       </div>
 
@@ -55,6 +74,13 @@ export function WritingFeedback({ task, promptText, essay, minWords, onResult })
         <div className="aiwf-error" role="alert">
           <p>{error}</p>
           <button className="btn btn-outline" onClick={run}>Try again</button>
+        </div>
+      )}
+
+      {state === 'quota' && (
+        <div className="aiwf-quota-block" role="alert">
+          <p>{error}</p>
+          <Link to="/pricing" className="btn btn-primary">See plans</Link>
         </div>
       )}
 

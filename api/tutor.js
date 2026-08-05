@@ -43,6 +43,6 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { reply })
   } catch (err) {
     const status = err instanceof AiError || err instanceof HttpError ? err.status : 500
-    return sendJson(res, status, { error: err.message || 'Something went wrong.' })
+    return sendJson(res, status, { error: err.message || 'Something went wrong.', code: err.code })
   }
 }

@@ -27,7 +27,10 @@ export async function postJsonAuthed(url, body) {
   }
 
   if (!res.ok) {
-    throw new Error(data2.error || `Request failed (${res.status}).`)
+    const err = new Error(data2.error || `Request failed (${res.status}).`)
+    err.status = res.status
+    err.code = data2.code
+    throw err
   }
   return data2
 }
@@ -50,6 +53,11 @@ export async function getJsonAuthed(url) {
   let body = {}
   try { body = await res.json() } catch { /* no JSON body */ }
 
-  if (!res.ok) throw new Error(body.error || `Request failed (${res.status}).`)
+  if (!res.ok) {
+    const err = new Error(body.error || `Request failed (${res.status}).`)
+    err.status = res.status
+    err.code = body.code
+    throw err
+  }
   return body
 }
