@@ -104,6 +104,23 @@ export async function recordUsage(supa, userId, feature) {
   }
 }
 
+/** Map a Paddle price id to a tier (reads price ids from env). */
+export function tierForPriceId(priceId) {
+  if (!priceId) return null
+  const silver = process.env.PADDLE_PRICE_SILVER || process.env.VITE_PADDLE_PRICE_SILVER
+  const gold = process.env.PADDLE_PRICE_GOLD || process.env.VITE_PADDLE_PRICE_GOLD
+  if (priceId === gold) return 'gold'
+  if (priceId === silver) return 'silver'
+  return null
+}
+
+/** Write subscription state onto a user's entitlement (service role, from the webhook). */
+export async function applyEntitlement(supa, userId, fields) {
+  await supa
+    .from('entitlements')
+    .upsert({ user_id: userId, ...fields, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+}
+
 /** Tier + remaining-quota summary for the UI (see api/usage.js). */
 export async function getUsageSummary(supa, userId) {
   const ent = await getEntitlement(supa, userId)

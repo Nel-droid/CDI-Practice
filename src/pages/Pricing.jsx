@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom'
 import { TIERS, TIER_RANK } from '../lib/billing/tiers'
 import { useUsage } from '../lib/useUsage'
 import { startCheckout, CHECKOUT_READY } from '../lib/billing/checkout'
+import { useAuth } from '../context/AuthContext'
 import './Pricing.css'
 
 export default function Pricing() {
+  const { user } = useAuth()
   const { usage } = useUsage()
   const currentTier = usage?.tier ?? 'free'
   const [busy, setBusy] = useState(null)
@@ -15,7 +17,7 @@ export default function Pricing() {
     setNotice('')
     setBusy(tierId)
     try {
-      await startCheckout(tierId)
+      await startCheckout(tierId, { email: user?.email, userId: user?.id })
     } catch (e) {
       setNotice(e.message)
     } finally {
