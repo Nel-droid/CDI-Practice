@@ -28,3 +28,7 @@ supabase/listening-maps/
 # Python cache
 __pycache__/
 *.pyc
+
+# Content images downloaded for S3 upload (not committed)
+deploy/s3-assets/listening-maps/
+deploy/s3-assets/writing-charts/

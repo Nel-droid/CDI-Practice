@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { listeningMapUrl } from '../../lib/s3assets'
 import { submitExam } from '../../lib/examApi'
 import { useExamPrefs } from '../../lib/useExamPrefs'
 import { ThemeToggle } from '../../components/ThemeToggle'
@@ -267,28 +268,11 @@ function CompletionInlineGroup({ group, responses, onRespond }) {
 
 // ── Questions panel ────────────────────────────────────────────────────────
 
-// Map/diagram image for a question group — fetched the same way as audio:
-// a time-limited signed URL from Storage, never a public URL.
+// Map/diagram image for a question group — served directly from the S3 bucket
+// by absolute URL (assets/listening-maps/<path>).
 function DiagramImage({ path }) {
-  const [src, setSrc] = useState(null)
   const [zoomed, setZoomed] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    setSrc(null)
-    supabase.storage
-      .from('listening-images')
-      .createSignedUrl(path, 3600)
-      .then(({ data, error }) => {
-        if (cancelled) return
-        if (error || !data?.signedUrl) {
-          console.error('[CDI] Diagram image signed URL fetch failed:', error)
-          return
-        }
-        setSrc(data.signedUrl)
-      })
-    return () => { cancelled = true }
-  }, [path])
+  const src = listeningMapUrl(path)
 
   if (!src) return null
 

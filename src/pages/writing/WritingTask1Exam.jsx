@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { writingChartUrl } from '../../lib/s3assets'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { AnnotationCanvas } from '../../components/AnnotationCanvas'
 import '../reading/ReadingExam.css'
@@ -88,13 +89,9 @@ export default function WritingTask1Exam() {
       setPrompt(p)
 
       if (p.chart_path) {
-        const { data: sd } = await supabase.storage
-          .from('writing-charts')
-          .createSignedUrl(p.chart_path, 3600)
-        if (sd?.signedUrl) {
-          setChartUrl(sd.signedUrl)
-          if (chartImgRef.current) chartImgRef.current.src = sd.signedUrl
-        }
+        const url = writingChartUrl(p.chart_path)
+        setChartUrl(url)
+        if (chartImgRef.current) chartImgRef.current.src = url
       }
       setLoading(false)
     }

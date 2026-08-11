@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
+import { writingChartUrl } from '../../lib/s3assets'
 import { ThemeToggle } from '../../components/ThemeToggle'
 import { AnnotationCanvas } from '../../components/AnnotationCanvas'
 import '../reading/ReadingExam.css'
@@ -110,10 +111,7 @@ export default function WritingFullTestExam() {
       if (p2) setTask2Prompt(p2)
 
       if (p1?.chart_path) {
-        const { data: sd } = await supabase.storage
-          .from('writing-charts')
-          .createSignedUrl(p1.chart_path, 3600)
-        if (sd?.signedUrl) setTask1ChartUrl(sd.signedUrl)
+        setTask1ChartUrl(writingChartUrl(p1.chart_path))
       }
       setLoading(false)
     }

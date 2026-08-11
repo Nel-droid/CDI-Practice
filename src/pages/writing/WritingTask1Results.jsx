@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { writingChartUrl } from '../../lib/s3assets'
 import { WritingFeedback } from '../../components/ai/WritingFeedback'
 import { renderFeedbackSection } from '../../lib/writingFeedbackPdf'
 import './WritingTask1Results.css'
@@ -192,10 +193,7 @@ export default function WritingTask1Results() {
           setPrompt(p)
           // Only fetch a fresh signed URL if we don't already have one from state
           if (!chartUrl && p.chart_path) {
-            const { data: sd } = await supabase.storage
-              .from('writing-charts')
-              .createSignedUrl(p.chart_path, 3600)
-            if (sd?.signedUrl) setChartUrl(sd.signedUrl)
+            setChartUrl(writingChartUrl(p.chart_path))
           }
         }
       }

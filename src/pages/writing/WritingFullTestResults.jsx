@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { writingChartUrl } from '../../lib/s3assets'
 import { WritingFeedback } from '../../components/ai/WritingFeedback'
 import { renderFeedbackSection } from '../../lib/writingFeedbackPdf'
 import './WritingTask1Results.css'
@@ -213,8 +214,7 @@ export default function WritingFullTestResults() {
       if (!chartUrl && sess.task1_prompt_id) {
         const { data: p1 } = await supabase.from('writing_prompts').select('chart_path').eq('id', sess.task1_prompt_id).single()
         if (p1?.chart_path) {
-          const { data: sd } = await supabase.storage.from('writing-charts').createSignedUrl(p1.chart_path, 3600)
-          if (sd?.signedUrl) setChartUrl(sd.signedUrl)
+          setChartUrl(writingChartUrl(p1.chart_path))
         }
       }
 
