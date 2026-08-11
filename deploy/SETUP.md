@@ -14,8 +14,10 @@ code changes, no CORS.
 
 | Where it's needed | Vars | Notes |
 |---|---|---|
-| **Build time** (when you run `deploy-web.sh` to build the SPA for S3) | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PADDLE_ENV`, `VITE_PADDLE_CLIENT_TOKEN`, `VITE_PADDLE_PRICE_SILVER`, `VITE_PADDLE_PRICE_GOLD` | Client-safe. Baked into the static bundle. **No server secrets here.** |
-| **Runtime** (EC2 `.env`, loaded by the API) | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `GEMINI_API_KEY`, (`GEMINI_MODEL`), `PADDLE_WEBHOOK_SECRET`, `PADDLE_PRICE_SILVER`, `PADDLE_PRICE_GOLD`, `PORT`, `NODE_ENV` | Secrets. Live only on the box (`deploy/.env.server.example` → repo-root `.env`, chmod 600). |
+| **Build time** (when you run `deploy-web.sh` to build the SPA for S3) | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | Client-safe. Baked into the static bundle. **No server secrets here.** |
+| **Runtime** (EC2 `.env`, loaded by the API) | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `GEMINI_API_KEY`, (`GEMINI_MODEL`), `PORT`, `NODE_ENV` | Secrets. Live only on the box (`deploy/.env.server.example` → repo-root `.env`, chmod 600). |
+
+> Billing (Paddle) is intentionally **excluded from this deployment** — no checkout UI, no webhook route, no Paddle env vars. The subscription work is preserved on the `feat/subscriptions` branch.
 
 ---
 
@@ -101,7 +103,6 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## 6. Cutover checklist (when going live on the real domain)
 
-- Update **Paddle** webhook destination URL → `https://<domain>/api/billing/webhook`.
 - Update **Supabase** Auth redirect allowlist + Site URL, and **Google** OAuth
   origins, to the new domain.
 - Swap `cdi.example.com` for the real domain in `nginx-cdi.conf`, the cert, and DNS.

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { getWritingFeedback } from '../../lib/ai/aiClient'
 import { useUsage } from '../../lib/useUsage'
 import './WritingFeedback.css'
@@ -51,13 +50,12 @@ export function WritingFeedback({ task, promptText, essay, minWords, onResult })
             <p className="aiwf-quota">
               {Math.max(0, w.limit - w.used)} of {w.limit}{' '}
               {w.period === 'lifetime' ? 'free writing checks left' : 'writing checks left today'}
-              {usage.tier === 'free' && <> · <Link to="/pricing">Upgrade for more</Link></>}
             </p>
           )}
         </div>
         {state !== 'done' && (
           outOfChecks ? (
-            <Link to="/pricing" className="btn btn-primary aiwf-run">See plans</Link>
+            <span className="aiwf-quota">You've used all your writing checks.</span>
           ) : (
             <button className="btn btn-primary aiwf-run" onClick={run} disabled={state === 'loading'}>
               {state === 'loading' ? 'Assessing…' : 'Get AI feedback'}
@@ -80,7 +78,6 @@ export function WritingFeedback({ task, promptText, essay, minWords, onResult })
       {state === 'quota' && (
         <div className="aiwf-quota-block" role="alert">
           <p>{error}</p>
-          <Link to="/pricing" className="btn btn-primary">See plans</Link>
         </div>
       )}
 

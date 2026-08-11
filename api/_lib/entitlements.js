@@ -45,8 +45,8 @@ async function usedToday(supa, userId, feature) {
 function overQuota(feature, lifetime) {
   const what = feature === 'tutor' ? 'AI tutor messages' : 'writing checks'
   const msg = lifetime
-    ? `You've used all your free ${what}. Upgrade to Silver or Gold for more.`
-    : `You've used all your ${what} for today. They reset tomorrow — or upgrade for a higher daily limit.`
+    ? `You've used all your free ${what}.`
+    : `You've used all your ${what} for today. They reset tomorrow.`
   const err = new HttpError(msg, 402) // 402 Payment Required
   err.code = 'quota_exceeded'
   err.feature = feature
@@ -102,23 +102,6 @@ export async function recordUsage(supa, userId, feature) {
   } catch {
     // fail open — never break a successful response over a counter write
   }
-}
-
-/** Map a Paddle price id to a tier (reads price ids from env). */
-export function tierForPriceId(priceId) {
-  if (!priceId) return null
-  const silver = process.env.PADDLE_PRICE_SILVER || process.env.VITE_PADDLE_PRICE_SILVER
-  const gold = process.env.PADDLE_PRICE_GOLD || process.env.VITE_PADDLE_PRICE_GOLD
-  if (priceId === gold) return 'gold'
-  if (priceId === silver) return 'silver'
-  return null
-}
-
-/** Write subscription state onto a user's entitlement (service role, from the webhook). */
-export async function applyEntitlement(supa, userId, fields) {
-  await supa
-    .from('entitlements')
-    .upsert({ user_id: userId, ...fields, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
 }
 
 /** Tier + remaining-quota summary for the UI (see api/usage.js). */

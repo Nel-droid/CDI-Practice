@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { askTutor } from '../../lib/ai/aiClient'
 import { useUsage } from '../../lib/useUsage'
 import { Markdown } from './Markdown'
@@ -132,8 +132,7 @@ export function TutorWidget() {
             if (out) {
               return (
                 <div className="tutor-quota tutor-quota--out">
-                  <span>You've used today's {t?.limit ?? ''} tutor messages.</span>
-                  <Link to="/pricing" onClick={() => setOpen(false)}>See plans →</Link>
+                  <span>You've used today's {t?.limit ?? ''} tutor messages. They reset tomorrow.</span>
                 </div>
               )
             }
@@ -141,9 +140,6 @@ export function TutorWidget() {
               return (
                 <p className="tutor-quota">
                   {Math.max(0, t.limit - t.used)} of {t.limit} left today
-                  {usage.tier === 'free' && (
-                    <> · <Link to="/pricing" onClick={() => setOpen(false)}>Upgrade</Link></>
-                  )}
                 </p>
               )
             }
