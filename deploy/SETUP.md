@@ -37,7 +37,7 @@ sudo apt-get install -y nodejs nginx git
 sudo npm i -g pm2
 
 # App
-git clone https://github.com/Nel-droid/cdi-ielts.git ~/cdi-practice
+git clone https://github.com/Nel-droid/CDI-Practice.git ~/cdi-practice
 cd ~/cdi-practice
 git checkout feat/aws-migration        # until it's merged to main
 
