@@ -9,11 +9,9 @@ import './AppShell.css'
 
 // The header logo is loaded directly from the S3 bucket by its full URL (not a
 // bundled local asset), so it shows up as an S3 request in the browser's Network
-// tab. NOTE: this is the S3 *website* endpoint, which is HTTP-only — fine when the
-// page itself is served over HTTP. If the page is served over HTTPS (e.g. behind
-// Cloudflare), browsers block this as mixed content; use the HTTPS REST endpoint
-// instead: https://cdi-practice-frontend.s3.us-east-1.amazonaws.com/assets/cdi-mark.svg
-const S3_LOGO = 'http://cdi-practice-frontend.s3-website-us-east-1.amazonaws.com/assets/cdi-mark.svg'
+// tab. Uses the S3 *REST* endpoint (HTTPS), which works whether the page is served
+// over HTTP or HTTPS — no mixed-content issue once the site is behind Cloudflare.
+const S3_LOGO = 'https://cdi-practice-frontend.s3.us-east-1.amazonaws.com/assets/cdi-mark.svg'
 
 export default function AppShell() {
   const location = useLocation()
