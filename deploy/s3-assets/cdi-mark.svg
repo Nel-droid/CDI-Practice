@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" role="img" aria-label="CDI Practice">
+  <rect width="44" height="44" rx="9" fill="#0A1424"/>
+  <path fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="butt" d="M 34,12 A 16,16 0 1,0 34,32"/>
+  <rect x="11" y="25" width="7" height="8"  rx="1" fill="#5A9BFF"/>
+  <rect x="19" y="18" width="7" height="15" rx="1" fill="#34D399"/>
+  <rect x="27" y="11" width="7" height="22" rx="1" fill="#FBBF24"/>
+</svg>

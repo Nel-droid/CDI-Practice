@@ -1,12 +1,19 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { ThemeToggle } from './ThemeToggle'
-import { Logo } from './Logo'
 import { Avatar, DEFAULT_AVATAR_COLOR } from './Avatar'
 import { TutorWidget } from './ai/TutorWidget'
 import { BackgroundLayer } from './BackgroundLayer'
 import { TelegramLink } from './TelegramLink'
 import './AppShell.css'
+
+// The header logo is loaded directly from the S3 bucket by its full URL (not a
+// bundled local asset), so it shows up as an S3 request in the browser's Network
+// tab. NOTE: this is the S3 *website* endpoint, which is HTTP-only — fine when the
+// page itself is served over HTTP. If the page is served over HTTPS (e.g. behind
+// Cloudflare), browsers block this as mixed content; use the HTTPS REST endpoint
+// instead: https://cdi-practice-frontend.s3.us-east-1.amazonaws.com/assets/cdi-mark.svg
+const S3_LOGO = 'http://cdi-practice-frontend.s3-website-us-east-1.amazonaws.com/assets/cdi-mark.svg'
 
 export default function AppShell() {
   const location = useLocation()
@@ -20,7 +27,7 @@ export default function AppShell() {
       <BackgroundLayer />
       <header className="shell-header">
         <NavLink to="/dashboard" className="shell-logo">
-          <Logo size={26} className="logo-mark--inv" />
+          <img src={S3_LOGO} alt="CDI Practice" width="26" height="26" className="shell-logo-img" />
           <span>CDI Practice</span>
         </NavLink>
         <nav className="shell-nav" aria-label="Main navigation">
