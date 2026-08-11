@@ -16,6 +16,12 @@ npm ci
 npm run build
 
 echo "==> Syncing dist/ to s3://$BUCKET"
-aws s3 sync dist/ "s3://$BUCKET" --delete
+# --delete prunes old hashed build files, but the bucket ALSO hosts content
+# images (logo, listening maps, writing charts) that are NOT part of dist/ —
+# exclude them so they're never deleted by the frontend sync.
+aws s3 sync dist/ "s3://$BUCKET" --delete \
+  --exclude "assets/cdi-mark.svg" \
+  --exclude "assets/listening-maps/*" \
+  --exclude "assets/writing-charts/*"
 
 echo "==> Done. If Cloudflare caches static assets, purge the cache (or rely on hashed filenames)."
