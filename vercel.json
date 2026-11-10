@@ -1,10 +1,13 @@
 {
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 60
-    }
-  },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "builds": [
+    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } },
+    { "src": "api/grade.js", "use": "@vercel/node" },
+    { "src": "api/tutor.js", "use": "@vercel/node" },
+    { "src": "api/writing-feedback.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
